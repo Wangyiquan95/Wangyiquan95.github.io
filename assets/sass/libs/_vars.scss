@@ -1,45 +1,44 @@
 // Misc.
 	$misc: (
-		z-index-base:		10000,
-		main-side:			right,
-		main-align:			right,
-		thumbnails-per-row:	2
+		z-index-base:		10000
 	);
 
 // Duration.
 	$duration: (
-		transition:			0.25s,
-		layout:				0.75s,
-		layout-alt:			0.5s,
-		slide:				0.5s,
-		spinner:			1s
+		nav:				0.5s,
+		transition:			0.2s
 	);
 
 // Size.
 	$size: (
-		border-radius:		4px,
-		border-width:		1px,
+		border-radius:		0.375em,
 		element-height:		2.75em,
-		element-margin:		1.25em,
-		main:				22.5em,
-		main-alt:			19em
+		element-margin:		2em,
+		sidebar-width:		26em,
+		sidebar-width-alt:	24em,
+		gutter:				3em
 	);
 
 // Font.
 	$font: (
-		family:				('Roboto', Helvetica, sans-serif),
+		family:				('Open Sans', sans-serif),
+		family-heading:		('Roboto Slab', serif),
 		family-fixed:		('Courier New', monospace),
 		weight:				400,
-		weight-bold:		700
+		weight-bold:		600,
+		weight-heading:		700,
+		weight-heading-alt:	400,
+		kerning-heading:	0.075em
 	);
 
 // Palette.
 	$palette: (
-		page-bg:			#101010,
-		bg:					#fff,
-		fg:					#aaa,
-		fg-bold:			#555,
-		fg-light:			#ccc,
-		border:				#ccc,
-		accent:				#00D3B7
+		bg:					#ffffff,
+		bg-alt:				#f5f6f7,
+		fg:					#7f888f,
+		fg-bold:			#3d4449,
+		fg-light:			#9fa3a6,
+		border:				rgba(210,215,217,0.75),
+		border-bg:			transparentize(#e6ebed, 0.75),
+		accent:				#f56a6a
 	);
