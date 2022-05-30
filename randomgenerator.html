@@ -1,0 +1,128 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Idea Generator</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="index.html" class="logo"><strong>Idea Generator</strong></a>
+									<ul class="icons">
+										<li><a href="https://twitter.com/Yiquan_W" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+										<li><a href="facebook.com/yiquanW/" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+										<li><a href="https://github.com/Wangyiquan95" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+										<li><a href="https://www.instagram.com/yiquan1995/" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+										<li><a href="https://www.linkedin.com/in/yiquan-w" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+									</ul>
+								</header>
+						</div>
+						<div>
+							<!-- Buttons -->
+							<h2> </h2>
+							<ul class="actions stacked">
+								<button>generate</button>
+							</ul>
+						</div>
+						<div id="output" class="align-center"></div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+
+							<!-- Search -->
+								<section id="search" class="alt">
+									<form id="form" role="search">
+										<input type="text" name="query" id="query" placeholder="Search" aria-label="Search through site content"/>
+									</form>
+								</section>
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="index.html">Home</a></li>
+										<li><a href="aboutme.html">About me</a></li>
+										<li><a href="research.html">Research</a></li>
+										<li><a href="blog.html">The blog</a></li>
+										<li><a href="randomgenerator.html">Idea Generator</a></li>
+										<li>
+											<span class="opener">Bio-art</span>
+											<ul>
+												<li><a href="biopainting.html">Bio-painting</a></li>
+												<li><a href="bioplus.html">Bio-plus</a></li>
+												<li><a href="bioprocess.html">Bio-process</a></li>
+												<li><a href="biovideo.html">Bio-video</a></li>
+											</ul>
+										</li>
+
+									</ul>
+								</nav>
+
+							<!-- Section -->
+								<section>
+									<header class="major">
+										<h2>Get in touch</h2>
+									</header>
+									<p>leave me a message</p>
+									<ul class="contact">
+										<li class="icon solid fa-envelope"><a href="mailto:yiquan2@illinois.edu">yiquan2@illinois.edu</a></li>
+										<li class="icon solid fa-phone">(217) 721-4325</li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<p class="copyright">&copy; Yiquan Wang. All rights reserved. </p>
+								</footer>
+
+						</div>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script>
+
+    			var btn = document.querySelector("button");
+    			var out = document.getElementById("output");
+
+
+    			btn.addEventListener("click", getWord);
+
+    			function getWord(){
+					var theWord= ['dog','potato', 'cow', 'parrot', 'stone', 'watch', 'house', 'biolumonesance'];
+
+
+      				var wordNum = Math.floor(Math.random() * theWord.length);
+
+
+      				output.textContent = theWord[wordNum];
+    			}
+			</script>
+
+	</body>
+</html>
