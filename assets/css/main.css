@@ -1244,6 +1244,20 @@ input[type="radio"] + label:before {
     .image.main img {
       width: 100%; }
 
+/* Fading animation */
+.fade {
+  animation-name: fade;
+  animation-duration: 2s;
+  display: block;
+  margin: 0 0 3em 0;
+  width: 100%; }
+  .fade img {
+    width: 100%; }
+@keyframes fade {
+    from {opacity: .4}
+    to {opacity: 1}
+    }
+
 a.image {
   overflow: hidden; }
   a.image img {
@@ -2273,5 +2287,3 @@ button,
     margin-top: 0;
     padding-top: 0; }
 * {box-sizing:border-box}
-
-
