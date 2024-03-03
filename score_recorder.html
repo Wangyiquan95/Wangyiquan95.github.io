@@ -1,8 +1,12 @@
 <!DOCTYPE HTML>
-
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
 <html>
 	<head>
-		<title>About me</title>
+		<title>Idea Generator</title>
 		<link rel="icon" type="image/png" href="images/favicon/android-chrome-512x512.png" />
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
@@ -28,64 +32,29 @@
 										<li><a href="https://www.linkedin.com/in/yiquan-w" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
 									</ul>
 								</header>
+						</div>
 
-							<!-- Content -->
-							   	<section>
-									<header class="main">
-										<h1>C4D art</h1>
-									</header>
+						<div>
+							<p></p>
+							<h2>Player Scores</h2>
+							<ul class="actions stacked">
+								<button onclick="addPlayer()">Add Player</button>
+								<table id="scoreTable">
+									<tr>
+										<th>Player Name</th>
+										<th>Final Score</th>
+									</tr>
+								</table>
 
-									<div class="row gtr-200">
-										<!-- figure -->
-										<div class="col-6 col-12-medium">
-											<header class="main">
-												<h2></h2>
-											</header>
-											<p></p><span class="image main"><img src="images/cover3.jpeg" alt="" /></span>
-										</div>
-										<!-- figure -->
-										<div class="col-6 col-12-medium">
-											<header class="main">
-												<h2></h2>
-											</header>
-											<p></p><span class="image main"><img src="images/water_virion.jpg" alt="" /></span>
-										</div>
-										<!-- figure -->
-										<div class="col-6 col-12-medium">
-											<header class="main">
-												<h2></h2>
-											</header>
-											<p></p><span class="image main"><img src="images/virons water drop7.jpg" alt="" /></span>
-										</div>
-										<!-- figure -->
-										<div class="col-6 col-12-medium">
-											<header class="main">
-												<h2></h2>
-											</header>
-											<p></p><span class="image main"><img src="images/taiji2.jpg" alt="" /></span>
-										</div>
-										<!-- figure -->
-										<div class="col-6 col-12-medium">
-											<header class="main">
-												<h2></h2>
-											</header>
-											<p></p><span class="image main"><img src="images/taiji9.jpg" alt="" /></span>
-										</div>
-										<!-- figure -->
-										<div class="col-6 col-12-medium">
-											<header class="main">
-												<h2></h2>
-											</header>
-											<p></p><span class="image main"><img src="images/mirror_cube2.jpg" alt="" /></span>
-										</div>
+								<button onclick="calculateScores()">Calculate Scores</button>
 
-									</div>
-
-								</section>
-
+								<div id="result">
+									<h2>Final Scores</h2>
+									<table id="resultTable"></table>
+								</div>
+							</ul>
 						</div>
 					</div>
-
 				<!-- Sidebar -->
 					<div id="sidebar">
 						<div class="inner">
@@ -143,13 +112,62 @@
 					</div>
 
 			</div>
-
 		<!-- Scripts -->
 			<script src="assets/js/jquery.min.js"></script>
 			<script src="assets/js/browser.min.js"></script>
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<script>
+				let playerCount = 1;
+
+				function addPlayer() {
+					const table = document.getElementById("scoreTable");
+					const row = table.insertRow(-1);
+
+					const cell1 = row.insertCell(0);
+					const cell2 = row.insertCell(1);
+
+					cell1.innerHTML = `<input type="text" id="playerName${playerCount}" value="Player ${playerCount}" placeholder="Enter name">`;
+					cell2.innerHTML = `<input type="number" id="score${playerCount}" placeholder="Enter score" required>`;
+
+					playerCount++;
+				}
+
+				function calculateScores() {
+					const resultTable = document.getElementById("resultTable");
+					resultTable.innerHTML = "";
+
+					const scores = [];
+
+					for (let i = 1; i < playerCount; i++) {
+						const playerName = document.getElementById(`playerName${i}`).value || `Player ${i}`;
+						const score = parseInt(document.getElementById(`score${i}`).value) || 0;
+
+						scores.push({ playerName, score });
+					}
+
+					scores.sort((a, b) => b.score - a.score); // Sort in descending order
+
+					const headerRow = resultTable.insertRow(0);
+					const headerCell1 = headerRow.insertCell(0);
+					const headerCell2 = headerRow.insertCell(1);
+
+					headerCell1.innerHTML = "<b>Player Name</b>";
+					headerCell2.innerHTML = "<b>Final Score</b>";
+
+					scores.forEach((player, index) => {
+						const row = resultTable.insertRow(index + 1);
+						const cell1 = row.insertCell(0);
+						const cell2 = row.insertCell(1);
+
+						cell1.innerHTML = `<input type="text" value="${player.playerName}" readonly>`;
+						cell2.textContent = player.score;
+					});
+
+					document.getElementById("result").style.display = "block";
+				}
+			</script>
 
 	</body>
 </html>
