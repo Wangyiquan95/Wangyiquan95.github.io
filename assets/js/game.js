@@ -6,14 +6,21 @@ const gridSize = 20;
 canvas.width = 400;
 canvas.height = 400;
 
-const snake = [{ x: 100, y: 100 }];
+// Define nucleotides and colors
+const nucleotides = ['A', 'U', 'G', 'C'];
+const nucleotideColors = {
+    'A': '#ff4500', // Example color for 'A'
+    'U': '#4682b4', // Example color for 'U'
+    'G': '#32cd32', // Example color for 'G'
+    'C': '#ffa07a'  // Example color for 'C'
+};
+
+const snake = [{ x: 100, y: 100, nucleotide: 'A' }]; // Start with one segment of 'A'
 let direction = { x: gridSize, y: 0 };
 let nucleotide = randomNucleotide();
 let score = 0;
 
-const nucleotides = ['A', 'U', 'G', 'C'];
-
-// Randomly generate a nucleotide on the grid
+// Function to randomly generate a nucleotide on the grid
 function randomNucleotide() {
     const x = Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize;
     const y = Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize;
@@ -27,12 +34,13 @@ function draw() {
 
     // Draw snake
     snake.forEach(segment => {
-        ctx.fillStyle = '#4caf50';
-        ctx.fillRect(segment.x, segment.y, gridSize, gridSize);
+        ctx.fillStyle = nucleotideColors[segment.nucleotide];
+        ctx.font = "16px monospace";
+        ctx.fillText(segment.nucleotide, segment.x + 5, segment.y + 15);
     });
 
     // Draw nucleotide
-    ctx.fillStyle = '#ff4500';
+    ctx.fillStyle = nucleotideColors[nucleotide.value];
     ctx.font = "16px monospace";
     ctx.fillText(nucleotide.value, nucleotide.x + 5, nucleotide.y + 15);
 }
@@ -48,14 +56,15 @@ function update() {
         return;
     }
 
-    snake.unshift(head);
+    // Add new head segment with the nucleotide it has just eaten
+    snake.unshift({ ...head, nucleotide: nucleotide.value });
 
     // Check if snake eats nucleotide
     if (head.x === nucleotide.x && head.y === nucleotide.y) {
         nucleotide = randomNucleotide();
         score++;
     } else {
-        snake.pop();
+        snake.pop(); // Remove the last segment if not eating nucleotide
     }
 }
 
