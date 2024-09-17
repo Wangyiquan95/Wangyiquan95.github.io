@@ -1,0 +1,26 @@
+body {
+    font-family: monospace;
+    background-color: #2b2b2b;
+    color: #f1f1f1;
+    text-align: center;
+}
+
+#game-area {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#game-canvas {
+    background-color: #000;
+    border: 2px solid #4caf50;
+}
+
+h1 {
+    color: #4caf50;
+}
+
+p {
+    font-size: 14px;
+    color: #a9a9a9;
+}
