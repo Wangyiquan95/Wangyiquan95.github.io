@@ -296,3 +296,30 @@ function carousel() {
   x[myIndex-1].style.display = "block";
   setTimeout(carousel, 4000); // Change image every 2 seconds
 }
+document.querySelectorAll('.gallery-image').forEach((image) => {
+    image.addEventListener('mouseover', () => {
+        image.style.zIndex = '10';
+    });
+    image.addEventListener('mouseout', () => {
+        image.style.zIndex = '1';
+    });
+});
+
+const images = document.querySelectorAll('.art-image');
+
+images.forEach(image => {
+    image.addEventListener('click', () => {
+        const selectedImage = document.createElement('img');
+        selectedImage.src = image.src;
+        selectedImage.alt = image.alt;
+        selectedImage.className = 'full-view';
+
+        // Center the selected image
+        document.body.appendChild(selectedImage);
+
+        // Add click event to remove the full view image
+        selectedImage.addEventListener('click', () => {
+            document.body.removeChild(selectedImage);
+        });
+    });
+});

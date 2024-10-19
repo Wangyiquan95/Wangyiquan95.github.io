@@ -32,60 +32,69 @@
 							<!-- Content -->
 							   	<section>
 									<header class="main">
-										<h1>Research</h1>
+										<h2>Research</h2>
 									</header>
-									<h2>Overview</h2>
+<!--									<h3>Overview</h3>-->
 									<span class="image fit"><img src="images/SARS2-3.jpg" alt="" /></span>
-									<p>I am generally interested in understanding the relationship between biological sequence, structure and function. Specifically, I study how the primary sequence of an antibody determines its structure and function, how changes in genetic information affect the viral phenotype by developing deep learning models and conducting biological experiments</p>
+									<p>I am generally interested in understanding the relationship between biological sequence, structure and function. Specifically, I study how the primary sequence of an antibody determines its structure and function, how changes in genetic information affect the viral phenotype by developing deep learning models and conducting high-throughput experiments</p>
 
 									<div class="row gtr-200">
-										<!-- antibody -->
-										<div class="col-6 col-12-medium">
-											<header class="main">
-												<h2>Antibody response</h2>
+										<!-- background -->
+										<header class="main">
+												<h2>Background</h2>
 											</header>
+												<p>Viruses pose a significant risk to global health, as exemplified by H1N1 influenza pandemic and the COVID-19 pandemic. Vaccination remains the primary preventive measure against viral infections. However, the rapid evolution of viruses and their ability to evade immune responses often compromise vaccine effectiveness. For example, during the 2023-24 flu season, vaccine effectiveness (VE) against influenza A was only 27% to 46%, and when vaccines did not match the circulating strains, effectiveness dropped to as low as 10% to 20%. Human antibodies play a critical role in fighting viral infections, but they also drive the emergence of new viral variants, such as the SARS-CoV-2 KP.3 variant, which can evade pre-existing antibodies by reducing their binding affinity or neutralization potency. The appearance of the SARS-CoV-2 Omicron variant in 2021, for example, significantly reduced the efficacy of many antibody-based therapies. Nevertheless, the immune system can adapt through natural infections or vaccinations, restoring antibody binding affinity via additional rounds of somatic hypermutation and affinity maturation within germinal centers. This process creates a complex coevolutionary dynamic between viruses and the immune system. Deciphering these dynamics is crucial for developing innovative strategies to monitor, predict, and counteract viral evolution, ultimately enhancing vaccine design and therapeutic effectiveness.</p>
 
-											<p></p><span class="image main"><a href="https://doi.org/10.1016/j.immuni.2022.03.019"><img src="images/antibody_database.png" alt="" /></a></span>
+										<!-- antibody -->
+										<div class="col-12-small">
+											<header class="main">
+												<h2>Antibody Response and Design</h2>
+											</header>
+												<p> The immune system, primarily through the action of B cells and the antibodies they produce, exerts selective pressure on viruses, driving their evolution. With the technological advancements in single-cell high-throughput screen and paired B cell receptor sequencing, it is now possible to sequence the B cell repertoire at an unprecedented scale. However, predicting antibody function and structure based solely on these sequences remains a formidable task. Functional characterization of specific B cells often requires downstream experimental techniques, such as ELISA, neutralization assays, X-ray crystallography and cryogenic electron microscopy (cryo-EM), which are labor-intensive, time-consuming, and inherently low throughput.</p>
+
+<!--											<p></p><span class="image main"><a href="https://doi.org/10.1016/j.immuni.2022.03.019"><img src="images/antibody_database.png" alt="" /></a></span>-->
 												<div class="row">
-													<h3>Hightlight</h3>
+<!--													<h3>Hightlight</h3>-->
 														<ul>
-															<li>Assembled a dataset of ∼8,000 published antibodies to SARS-CoV-2 S from >200 donors.</li>
-															<li>Antibodies to RBD, NTD, and S2 have distinct convergent sequence and molecular features.</li>
-															<li>Public antibody clonotypes show recurring affinity maturation pathway.</li>
-															<li>Provided a proof of concept for antibody specificity prediction using deep learning.</li>
+															<li>Assembled a dataset of ∼8,000 antibodies to SARS-CoV-2 and ~5,000 antibodies to Influenza Virus.</li>
+															<li>Antibodies have distinct convergent sequence and molecular features.</li>
+															<li>A novel language model specifically designed to analyze memory B cell receptor (BCR) repertoires, with a focus on predicting B cell specificity with high accuracy.</li>
+															<li>Identification of antibody binding motifs and accelerating the influenza antibody discovery.</li>
 														</ul>
 												</div>
 										</div>
 										<!-- viral evolution -->
-										<div class="col-6 col-12-medium">
+										<div class="col-12-small">
 											<header class="main">
-												<h2>The evolution of influenza virus</h2>
+												<h2>The Evolution of Influenza Virus</h2>
 											</header>
+												<p> Influenza A viruses continuously accumulate mutations in their major surface proteins, hemagglutinin (HA) and neuraminidase (NA). For instance, since influenza H3N2 virus entered the human population in 1968, its HA and NA proteins have accumulated over 83 and 73 amino acid mutations, respectively. These mutations often drive immune escape, requiring frequent updates to the influenza vaccine. A key challenge in studying influenza virus evolution is forecasting how these mutations affect the virus's functionality and antigenicity.</p>
 
-											<p></p><span class="image main"><a href="https://doi.org/10.7554/eLife.72516"><img src="images/NA_epi.png" alt="" /></a></span>
+
+<!--											<p></p><span class="image main"><a href="https://doi.org/10.7554/eLife.72516"><img src="images/NA_epi.png" alt="" /></a></span>-->
 												<div class="row">
-													<h3>Hightlight</h3>
+<!--													<h3>Hightlight</h3>-->
 														<ul>
-															<li>High-throughput combinatorial mutational scanning on Influenza virus neuraminidase (NA) antigenic region.</li>
-															<li>The local fitness landscape correlates well among strains and the pairwise epistasis is highly conserved.</li>
-															<li>Local net charge governs the pairwise epistasis in this antigenic region and residue coevolution is correlated with the pairwise epistasis between charge states.</li>
+															<li>High-throughput combinatorial mutational scanning on antigenic region.</li>
+															<li>Development of a high-throughput mutational fitness screening pipeline to quantify the effects of single amino acid mutations on viral proteins.</li>
 															<li>Quantifying epistasis and biophysical constraint helps to build a model of influenza evolution.</li>
 														</ul>
 												</div>
 										</div>
 										<!-- deep learning -->
-										<div class="col-6 col-12-medium">
+										<div class="col-12-small">
 											<header class="main">
-												<h2>Deep learning for antibody design</h2>
+												<h2>Deep Learning for Antibody-Virus Coevolution</h2>
 											</header>
+												<p>While our previous model has demonstrated its power, it still focused on individual components rather than capturing the full complexity of protein-protein interactions or evolutionary dynamics. Building on my expertise, my future research will focus on developing a multimodal language model that simultaneously incorporates viral and antibody sequences, protein structures, and protein-protein interaction data to comprehensively study the coevolution between viruses and the immune system. The successful execution of this research will advance our understanding of virus-antibody coevolution and provide essential tools for improving vaccine efficacy and therapeutic strategies against emerging viral threats. In the long term, this approach will contribute to unravel the intricate relationships between biological sequences, structures, and functions, from the "Omics" level down to the atomic scale.</p>
 
-											<p></p><span class="image main"><a href="#"><img src="images/deep_learning.jpg" alt="" /></a></span>
+<!--											<p></p><span class="image main"><a href="#"><img src="images/deep_learning.jpg" alt="" /></a></span>-->
 												<div class="row">
-													<h3>Hightlight</h3>
+<!--													<h3>Hightlight</h3>-->
 														<ul>
-															<li>Deep learning model for antibody structure prediction.</li>
-															<li>Deep learning model for antibody affinity prediction.</li>
-															<li>Deep learning model for antibody specificity prediction.</li>
+															<li>Building a comprehensive database and develop a novel antibody-viral language model.</li>
+															<li>Developing a multimodal generative model for virus-antibody dynamics.</li>
+															<li>Establishing a continual learning platform for model prediction and experimental feedback.</li>
 														</ul>
 												</div>
 										</div>
