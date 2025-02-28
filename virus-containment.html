@@ -93,6 +93,8 @@
             background: #dddddd;
             padding: 10px;
             border-radius: 8px;
+            max-width: 100%;
+            margin: 0 auto;
         }
         
         .cell {
@@ -242,7 +244,21 @@
 
             renderGrid() {
                 const gridElement = document.getElementById('grid');
-                gridElement.style.gridTemplateColumns = `repeat(${this.width}, 40px)`;
+                
+                // Calculate cell size based on screen width
+                let cellSize = 40;
+                const screenWidth = window.innerWidth;
+                
+                if (screenWidth <= 320) {
+                    cellSize = 20;
+                } else if (screenWidth <= 380) {
+                    cellSize = 24;
+                } else if (screenWidth <= 480) {
+                    cellSize = 28;
+                }
+                
+                // Set grid template columns with calculated cell size
+                gridElement.style.gridTemplateColumns = `repeat(${this.width}, ${cellSize}px)`;
                 gridElement.innerHTML = '';
 
                 for (let y = 0; y < this.height; y++) {
@@ -286,6 +302,11 @@
                     this.handleCellInteraction(e);
                 });
 
+                // Add window resize event listener
+                window.addEventListener('resize', () => {
+                    this.renderGrid();
+                });
+                
                 // Tool buttons touch handling
                 const handleToolButton = (button, tool, condition = true) => {
                     const touchHandler = (e) => {
