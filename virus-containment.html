@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Virus Containment</title>
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #333333;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .game-container {
+            text-align: center;
+            margin: 10px auto;
+            max-width: 100%;
+            padding: 0 10px;
+        }
+        
+        .stats {
+            margin: 10px auto;
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .grid {
+            display: inline-grid;
+            gap: 1px;
+            background: #dddddd;
+            padding: 5px;
+            border-radius: 8px;
+            touch-action: none;
+        }
+        
+        .cell {
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+        }
+        
+        .tools {
+            margin: 10px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        button {
+            padding: 8px 12px;
+            margin: 5px;
+            font-size: 14px;
+            min-width: 80px;
+            touch-action: manipulation;
+        }
+        
+        @media (max-width: 480px) {
+            .cell {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+            
+            .stats {
+                font-size: 14px;
+            }
+            
+            button {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            h1 {
+                font-size: 24px;
+                margin: 10px 0;
+            }
+        }
+        
+        .stats span {
+            padding: 5px 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            border: 1px solid #cccccc;
+        }
+        
+        .grid {
+            display: inline-grid;
+            gap: 2px;
+            background: #dddddd;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .cell {
+            width: 40px;
+            height: 40px;
+            background: #f0f0f0;
+            border: 1px solid #cccccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+        
+        .cell:hover {
+            background: #e0e0e0;
+        }
+        
+        .revealed {
+            background: #e8e8e8;
+        }
+        
+        .quarantine {
+            background: #ffdddd;
+            color: #ff0000;
+        }
+        
+        .antibody {
+            background: #ddddff;
+            color: #0000ff;
+        }
+        
+        .vaccine {
+            background: #ddffdd;
+            color: #008800;
+        }
+        
+        .tools {
+            margin: 20px;
+        }
+        
+        button {
+            background: #f0f0f0;
+            color: #333333;
+            border: 1px solid #999999;
+            padding: 10px 20px;
+            margin: 0 10px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            background: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Virus Containment</h1>
+        <div class="stats">
+            <span id="level">Level: 1</span>
+            <span id="score" style="display: none;">Score: 0</span>
+        </div>
+        <div class="tools">
+            <button id="quarantine">Quarantine Zone (Q)</button>
+            <button id="antibody">Deploy Antibody (A)</button>
+            <button id="vaccine">Use Vaccine (V)</button>
+        </div>
+        <div id="grid" class="grid"></div>
+        
+        <!-- Adding tutorial section -->
+        <div class="tutorial" style="margin-top: 20px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto; padding: 10px; background: #f8f8f8; border-radius: 8px; border: 1px solid #ddd;">
+            <h3 style="margin-top: 5px;">How to Play:</h3>
+            <ul style="padding-left: 20px;">
+                <li><strong>Quarantine Zone (Q):</strong> Isolate suspected virus cells to prevent spread.</li>
+                <li><strong>Deploy Antibody (A):</strong> Temporarily neutralize a virus and reveal nearby virus count.</li>
+                <li><strong>Use Vaccine (V):</strong> Permanently neutralize viruses in a 3×3 area.</li>
+            </ul>
+            <p style="font-size: 14px; margin-top: 5px;"><em>Click cells to reveal safe areas. Win by containing all viruses and revealing all safe cells!</em></p>
+        </div>
+    </div>
+
+    <script>
+        class VirusGame {
+            constructor(width = 10, height = 10, virusCount = 10) {
+                this.width = width;
+                this.height = height;
+                this.virusCount = virusCount;
+                this.grid = [];
+                this.revealed = new Set();
+                this.quarantined = new Set();
+                this.antibodies = new Set();
+                this.vaccines = new Set();
+                this.currentTool = 'reveal';
+                this.gameOver = false;
+                this.antibodyCount = 3;
+                this.vaccineCount = 1;
+                this.score = 0;
+                this.level = 1;
+                
+                this.initializeGrid();
+                this.setupEventListeners();
+                this.updateToolCounts();
+                this.updateStats();
+            }
+
+            initializeGrid() {
+                // Create empty grid
+                for (let y = 0; y < this.height; y++) {
+                    this.grid[y] = [];
+                    for (let x = 0; x < this.width; x++) {
+                        this.grid[y][x] = {
+                            hasVirus: false,
+                            nearbyViruses: 0
+                        };
+                    }
+                }
+
+                // Place viruses randomly
+                let virusesPlaced = 0;
+                while (virusesPlaced < this.virusCount) {
+                    const x = Math.floor(Math.random() * this.width);
+                    const y = Math.floor(Math.random() * this.height);
+                    
+                    if (!this.grid[y][x].hasVirus) {
+                        this.grid[y][x].hasVirus = true;
+                        virusesPlaced++;
+                        
+                        // Update nearby virus counts
+                        this.updateNearbyCount(x, y);
+                    }
+                }
+
+                this.renderGrid();
+            }
+
+            updateNearbyCount(virusX, virusY) {
+                for (let y = Math.max(0, virusY - 1); y <= Math.min(this.height - 1, virusY + 1); y++) {
+                    for (let x = Math.max(0, virusX - 1); x <= Math.min(this.width - 1, virusX + 1); x++) {
+                        if (!this.grid[y][x].hasVirus) {
+                            this.grid[y][x].nearbyViruses++;
+                        }
+                    }
+                }
+            }
+
+            renderGrid() {
+                const gridElement = document.getElementById('grid');
+                gridElement.style.gridTemplateColumns = `repeat(${this.width}, 40px)`;
+                gridElement.innerHTML = '';
+
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.x = x;
+                        cell.dataset.y = y;
+                        const key = `${x},${y}`;
+                    
+                        if (this.revealed.has(key)) {
+                            cell.classList.add('revealed');
+                            if (this.grid[y][x].hasVirus) {
+                                cell.textContent = '🦠';
+                            } else if (this.grid[y][x].nearbyViruses > 0) {
+                                cell.textContent = this.grid[y][x].nearbyViruses;
+                            }
+                        } else if (this.quarantined.has(key)) {
+                            cell.classList.add('quarantine');
+                            cell.textContent = '🔒';
+                        } else if (this.antibodies.has(key)) {
+                            cell.classList.add('antibody');
+                            cell.textContent = '🛡️';
+                        } else if (this.vaccines.has(key)) {
+                            cell.classList.add('vaccine');
+                            cell.textContent = '💉';
+                        }
+                    
+                        gridElement.appendChild(cell);
+                    }
+                }
+            }
+
+            setupEventListeners() {
+                const gridElement = document.getElementById('grid');
+                
+                // Handle both click and touch events
+                gridElement.addEventListener('click', (e) => this.handleCellInteraction(e));
+                gridElement.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); // Prevent zooming
+                    this.handleCellInteraction(e);
+                });
+
+                // Tool buttons touch handling
+                const handleToolButton = (button, tool, condition = true) => {
+                    const touchHandler = (e) => {
+                        e.preventDefault();
+                        if (condition) {
+                            this.currentTool = this.currentTool === tool ? 'reveal' : tool;
+                            this.updateToolHighlights();
+                        } else {
+                            alert(`No ${tool}s remaining!`);
+                        }
+                    };
+
+                    button.addEventListener('click', touchHandler);
+                    button.addEventListener('touchstart', touchHandler);
+                };
+
+                handleToolButton(document.getElementById('quarantine'), 'quarantine');
+                handleToolButton(
+                    document.getElementById('antibody'),
+                    'antibody',
+                    this.antibodyCount > 0
+                );
+                handleToolButton(
+                    document.getElementById('vaccine'),
+                    'vaccine',
+                    this.vaccineCount > 0
+                );
+
+                // Keyboard shortcuts (for devices with keyboards)
+                document.addEventListener('keydown', (e) => {
+                    if (e.key.toLowerCase() === 'q') {
+                        this.currentTool = this.currentTool === 'quarantine' ? 'reveal' : 'quarantine';
+                        this.updateToolHighlights();
+                    } else if (e.key.toLowerCase() === 'a' && this.antibodyCount > 0) {
+                        this.currentTool = this.currentTool === 'antibody' ? 'reveal' : 'antibody';
+                        this.updateToolHighlights();
+                    } else if (e.key.toLowerCase() === 'v' && this.vaccineCount > 0) {
+                        this.currentTool = this.currentTool === 'vaccine' ? 'reveal' : 'vaccine';
+                        this.updateToolHighlights();
+                    }
+                });
+            }
+
+            updateToolHighlights() {
+                document.getElementById('quarantine').style.background = this.currentTool === 'quarantine' ? '#ffcccc' : '#f0f0f0';
+                document.getElementById('antibody').style.background = this.currentTool === 'antibody' ? '#ccccff' : '#f0f0f0';
+                document.getElementById('vaccine').style.background = this.currentTool === 'vaccine' ? '#ccffcc' : '#f0f0f0';
+            }
+
+            // Move these methods before handleCellInteraction
+            deployAntibody(x, y) {
+                const key = `${x},${y}`;
+                if (this.revealed.has(key) || this.quarantined.has(key) || this.vaccines.has(key)) return;
+                
+                if (this.antibodies.has(key)) {
+                    this.antibodies.delete(key);
+                    this.antibodyCount++;
+                } else if (this.antibodyCount > 0) {
+                    this.antibodies.add(key);
+                    this.antibodyCount--;
+                    
+                    // Antibodies reveal nearby virus counts but don't trigger them
+                    if (this.grid[y][x].hasVirus) {
+                        // Antibody neutralizes the virus temporarily
+                        alert('Antibody deployed! Virus temporarily neutralized.');
+                        this.score += 30; // Bonus for neutralizing a virus
+                    } else {
+                        // Show nearby virus count without revealing the cell
+                        alert(`Antibody deployed! Detected ${this.grid[y][x].nearbyViruses} nearby viruses.`);
+                    }
+                    
+                    this.updateStats();
+                }
+                
+                this.updateToolCounts();
+            }
+
+            useVaccine(x, y) {
+                const key = `${x},${y}`;
+                if (this.revealed.has(key) || this.quarantined.has(key) || this.antibodies.has(key)) return;
+                
+                if (this.vaccines.has(key)) {
+                    this.vaccines.delete(key);
+                    this.vaccineCount++;
+                } else if (this.vaccineCount > 0) {
+                    this.vaccines.add(key);
+                    this.vaccineCount--;
+                    
+                    // Vaccines reveal and neutralize viruses in a 3x3 area
+                    this.revealVaccineArea(x, y);
+                }
+                
+                this.updateToolCounts();
+            }
+
+            handleCellInteraction(e) {
+                if (this.gameOver) return;
+                
+                const cell = e.target.classList.contains('cell') ? e.target : 
+                            (e.touches && e.touches[0] ? document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY) : null);
+                
+                if (cell && cell.classList.contains('cell')) {
+                    const x = parseInt(cell.dataset.x);
+                    const y = parseInt(cell.dataset.y);
+                    
+                    if (this.currentTool === 'reveal') {
+                        this.revealCell(x, y);
+                    } else if (this.currentTool === 'quarantine') {
+                        this.toggleQuarantine(x, y);
+                    } else if (this.currentTool === 'antibody') {
+                        this.deployAntibody(x, y);
+                    } else if (this.currentTool === 'vaccine') {
+                        this.useVaccine(x, y);
+                    }
+                    
+                    this.renderGrid();
+                }
+            }
+            // Remove the duplicate deployAntibody and useVaccine methods that appear later in the code
+            revealVaccineArea(centerX, centerY) {
+                let virusesNeutralized = 0;
+                
+                for (let y = Math.max(0, centerY - 1); y <= Math.min(this.height - 1, centerY + 1); y++) {
+                    for (let x = Math.max(0, centerX - 1); x <= Math.min(this.width - 1, centerX + 1); x++) {
+                        const key = `${x},${y}`;
+                        
+                        if (this.grid[y][x].hasVirus) {
+                            virusesNeutralized++;
+                            // Neutralize the virus by marking it as revealed but safe
+                            this.grid[y][x].hasVirus = false;
+                        }
+                        
+                        // Reveal the cell
+                        this.revealed.add(key);
+                        
+                        // Remove any markers
+                        this.quarantined.delete(key);
+                        this.antibodies.delete(key);
+                    }
+                }
+                
+                // Add points for neutralizing viruses with vaccine
+                this.score += virusesNeutralized * 50;
+                this.updateStats();
+                
+                // Recalculate nearby virus counts for the entire grid
+                this.recalculateNearbyVirusCounts();
+                
+                alert(`Vaccine deployed! ${virusesNeutralized} viruses neutralized.`);
+                this.checkWin();
+            }
+            updateToolHighlights() {
+                document.getElementById('quarantine').style.background = this.currentTool === 'quarantine' ? '#ffcccc' : '#f0f0f0';
+                document.getElementById('antibody').style.background = this.currentTool === 'antibody' ? '#ccccff' : '#f0f0f0';
+                document.getElementById('vaccine').style.background = this.currentTool === 'vaccine' ? '#ccffcc' : '#f0f0f0';
+            }
+
+            updateToolCounts() {
+                document.getElementById('antibody').textContent = `Deploy Antibody (A) - ${this.antibodyCount}`;
+                document.getElementById('vaccine').textContent = `Use Vaccine (V) - ${this.vaccineCount}`;
+            }
+
+            updateStats() {
+                document.getElementById('level').textContent = `Level: ${this.level}`;
+                document.getElementById('score').textContent = `Score: ${this.score}`;
+            }
+
+            recalculateNearbyVirusCounts() {
+                // Reset all counts
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        if (!this.grid[y][x].hasVirus) {
+                            this.grid[y][x].nearbyViruses = 0;
+                        }
+                    }
+                }
+                
+                // Recalculate
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        if (this.grid[y][x].hasVirus) {
+                            this.updateNearbyCount(x, y);
+                        }
+                    }
+                }
+            }
+
+            revealCell(x, y) {
+                if (this.quarantined.has(`${x},${y}`)) return;
+                
+                if (this.grid[y][x].hasVirus) {
+                    this.gameOver = true;
+                    this.revealAll();
+                    
+                    // Show score when game over
+                    document.getElementById('score').style.display = 'inline-block';
+                    this.updateStats();
+                    
+                    // Game over - offer restart with score
+                    setTimeout(() => {
+                        if (confirm(`Game Over! Virus has spread! Final Score: ${this.score} points. Try again?`)) {
+                            this.restartGame();
+                        }
+                    }, 100);
+                    return;
+                }
+
+                this.revealed.add(`${x},${y}`);
+                
+                // Add points for revealing safe cells
+                this.score += 5;
+                
+                if (this.grid[y][x].nearbyViruses > 0) {
+                    // Bonus points for revealing cells near viruses
+                    this.score += this.grid[y][x].nearbyViruses * 2;
+                }
+                
+                if (this.grid[y][x].nearbyViruses === 0) {
+                    this.revealSurrounding(x, y);
+                }
+
+                this.updateStats();
+                this.checkWin();
+            }
+
+            revealSurrounding(x, y) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        const newX = x + dx;
+                        const newY = y + dy;
+                        
+                        if (newX >= 0 && newX < this.width && 
+                            newY >= 0 && newY < this.height && 
+                            !this.revealed.has(`${newX},${newY}`)) {
+                            this.revealCell(newX, newY);
+                        }
+                    }
+                }
+            }
+
+            toggleQuarantine(x, y) {
+                const key = `${x},${y}`;
+                if (this.revealed.has(key)) return;
+                
+                if (this.quarantined.has(key)) {
+                    this.quarantined.delete(key);
+                } else {
+                    this.quarantined.add(key);
+                    
+                    // Add points for correct quarantine
+                    if (this.grid[y][x].hasVirus) {
+                        this.score += 20;
+                        this.updateStats();
+                    }
+                }
+            }
+
+            revealAll() {
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        this.revealed.add(`${x},${y}`);
+                    }
+                }
+                this.renderGrid();
+            }
+
+            checkWin() {
+                let allVirusesContained = true;
+                let allSafeCellsRevealed = true;
+
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        const key = `${x},${y}`;
+                        if (this.grid[y][x].hasVirus) {
+                            if (!this.quarantined.has(key) && !this.antibodies.has(key)) {
+                                allVirusesContained = false;
+                            }
+                        } else if (!this.revealed.has(key)) {
+                            allSafeCellsRevealed = false;
+                        }
+                    }
+                }
+
+                if (allVirusesContained && allSafeCellsRevealed) {
+                    this.gameOver = true;
+                    
+                    // Level completion bonus
+                    const levelBonus = this.level * 100;
+                    this.score += levelBonus;
+                    
+                    // Show score when level is completed
+                    document.getElementById('score').style.display = 'inline-block';
+                    this.updateStats();
+                    
+                    // Proceed to next level
+                    setTimeout(() => {
+                        if (confirm(`Level ${this.level} completed! Bonus: ${levelBonus} points. Continue to level ${this.level + 1}?`)) {
+                            this.nextLevel();
+                        }
+                    }, 100);
+                }
+            }
+            
+            nextLevel() {
+                this.level++;
+                this.virusCount = Math.min(Math.floor(this.virusCount * 1.5), this.width * this.height / 3);
+                this.antibodyCount = Math.min(3 + Math.floor(this.level / 2), 6);
+                this.vaccineCount = Math.min(1 + Math.floor(this.level / 3), 3);
+                
+                this.grid = [];
+                this.revealed = new Set();
+                this.quarantined = new Set();
+                this.antibodies = new Set();
+                this.vaccines = new Set();
+                this.gameOver = false;
+                
+                this.initializeGrid();
+                this.updateToolCounts();
+                this.updateStats();
+            }
+            
+            restartGame() {
+                this.level = 1;
+                this.score = 0;
+                this.virusCount = 10;
+                this.antibodyCount = 3;
+                this.vaccineCount = 1;
+                
+                this.grid = [];
+                this.revealed = new Set();
+                this.quarantined = new Set();
+                this.antibodies = new Set();
+                this.vaccines = new Set();
+                this.gameOver = false;
+                
+                // Hide score when restarting game
+                document.getElementById('score').style.display = 'none';
+                
+                this.initializeGrid();
+                this.updateToolCounts();
+                this.updateStats();
+            }
+        }
+
+        // Start the game
+        const game = new VirusGame(10, 10, 10);
+    </script>
+</body>
+</html>
