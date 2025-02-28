@@ -204,6 +204,196 @@
             }
         }
 
+        let gameInterval;
+        const initialSpeed = 800; // Much slower initial speed (milliseconds)
+
+        function updateGameSpeed() {
+            if (gameInterval) clearInterval(gameInterval);
+            // More gradual speed increase: every 100 points reduces speed by 10ms
+            const speed = Math.max(150, initialSpeed - Math.floor(score / 100) * 10);
+            gameInterval = setInterval(gameLoop, speed);
+        }
+
+        function resetGame() {
+            snake = [{x: 10, y: 10}];
+            sequence = ['A'];
+            direction = 'right';
+            score = 0;
+            food = generateFood();
+            document.getElementById('score').textContent = 'Score: 0';
+            document.getElementById('sequence').textContent = 'RNA Sequence: A';
+            updateGameSpeed(); // Reset speed when game restarts
+        }
+
+        // Replace the setInterval line at the bottom with:
+        updateGameSpeed();
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            moveSnake();
+            drawSnake();
+            drawFood();
+        }
+
+        document.addEventListener('keydown', (event) => {
+            switch(event.key) {
+                case 'ArrowUp':
+                    if (direction !== 'down') direction = 'up';
+                    break;
+                case 'ArrowDown':
+                    if (direction !== 'up') direction = 'down';
+                    break;
+                case 'ArrowLeft':
+                    if (direction !== 'right') direction = 'left';
+                    break;
+                case 'ArrowRight':
+                    if (direction !== 'left') direction = 'right';
+                    break;
+            }
+        });
+
+        setInterval(gameLoop, 100);
+        // Add this line before the gameLoop starts
+        updateHighScores();
+    </script>
+    <!-- Add after the canvas element -->
+    <div class="controls">
+        <button class="control-btn" style="grid-area: up">↑</button>
+        <button class="control-btn" style="grid-area: left">←</button>
+        <button class="control-btn" style="grid-area: right">→</button>
+        <button class="control-btn" style="grid-area: down">↓</button>
+    </div>
+
+    <script>
+        // Add this function to handle canvas resizing
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const gridSize = 20;
+        const nucleotides = ['A', 'U', 'G', 'C'];
+
+        // Move resizeCanvas function after canvas initialization
+        function resizeCanvas() {
+            const container = document.querySelector('.game-area');
+            const containerWidth = container.clientWidth;
+            const size = Math.min(400, containerWidth - 20);
+
+            canvas.style.width = `${size}px`;
+            canvas.style.height = `${size}px`;
+        }
+
+        // Add event listener for window resize
+        window.addEventListener('resize', resizeCanvas);
+        // Initial resize
+        resizeCanvas();
+
+        let snake = [
+            {x: 10, y: 10}
+        ];
+        let sequence = ['A'];
+        let direction = 'right';
+        let food = generateFood();
+        let score = 0;
+
+        function generateFood() {
+            const position = {
+                x: Math.floor(Math.random() * (canvas.width / gridSize)),
+                y: Math.floor(Math.random() * (canvas.height / gridSize)),
+                type: nucleotides[Math.floor(Math.random() * nucleotides.length)]
+            };
+            return position;
+        }
+
+        const nucleotideColors = {
+            'A': '#FF5252', // Red for Adenine
+            'U': '#FFB74D', // Orange for Uracil
+            'G': '#4CAF50', // Green for Guanine
+            'C': '#2196F3'  // Blue for Cytosine
+        };
+
+        function drawSnake() {
+            snake.forEach((segment, index) => {
+                // Draw snake segment with nucleotide color
+                ctx.fillStyle = index < sequence.length ? nucleotideColors[sequence[index]] : '#81C784';
+                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+
+                // Draw nucleotide letter on snake segment
+                if (index < sequence.length) {
+                    ctx.fillStyle = 'white';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(sequence[index], segment.x * gridSize + 6, segment.y * gridSize + 14);
+                }
+            });
+        }
+
+        function drawFood() {
+            ctx.fillStyle = nucleotideColors[food.type];
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2);
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.fillText(food.type, food.x * gridSize + 6, food.y * gridSize + 14);
+        }
+
+        // Add after the existing constants
+        let highScores = JSON.parse(localStorage.getItem('rnaSnakeHighScores')) || [];
+
+        function updateHighScores() {
+            const scoreList = document.getElementById('scoreList');
+            scoreList.innerHTML = highScores
+                .slice(0, 3)
+                .map((score, index) => `
+                    <div class="highScore">${index + 1}. ${score.name}: ${score.score}</div>
+                `)
+                .join('');
+        }
+
+        function checkHighScore(score) {
+            const isHighScore = highScores.length < 3 || score > highScores[highScores.length - 1]?.score;
+
+            if (isHighScore) {
+                const name = prompt('Congratulations! You got a high score! Enter your name:');
+                if (name) {
+                    highScores.push({ name, score });
+                    highScores.sort((a, b) => b.score - a.score);
+                    highScores = highScores.slice(0, 3);
+                    localStorage.setItem('rnaSnakeHighScores', JSON.stringify(highScores));
+                    updateHighScores();
+                }
+            }
+        }
+
+        // Modify the existing moveSnake function to check for high scores when game ends
+        function moveSnake() {
+            const head = {x: snake[0].x, y: snake[0].y};
+
+            switch(direction) {
+                case 'up': head.y--; break;
+                case 'down': head.y++; break;
+                case 'left': head.x--; break;
+                case 'right': head.x++; break;
+            }
+
+            if (head.x < 0 || head.x >= canvas.width / gridSize ||
+                head.y < 0 || head.y >= canvas.height / gridSize ||
+                snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                checkHighScore(score);
+                alert('Game Over! Final Score: ' + score);
+                resetGame();
+                return;
+            }
+
+            snake.unshift(head);
+
+            if (head.x === food.x && head.y === food.y) {
+                sequence.push(food.type);
+                score += 10;
+                document.getElementById('score').textContent = 'Score: ' + score;
+                document.getElementById('sequence').textContent = 'RNA Sequence: ' + sequence.join('');
+                food = generateFood();
+            } else {
+                snake.pop();
+            }
+        }
+
         function resetGame() {
             snake = [{x: 10, y: 10}];
             sequence = ['A'];
