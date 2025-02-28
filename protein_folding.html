@@ -1,0 +1,377 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Protein Folding Challenge - Yiquan Wang</title>
+		<link rel="icon" type="image/png" href="images/favicon/android-chrome-512x512.png" />
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<style>
+			#game-container {
+				width: 100%;
+				max-width: 800px;
+				margin: 0 auto;
+				padding: 20px;
+				background-color: #f5f5f5;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0,0,0,0.1);
+			}
+			
+			#protein-chain {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				margin: 20px 0;
+			}
+			
+			.amino-acid {
+				width: 50px;
+				height: 50px;
+				margin: 5px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 50%;
+				cursor: pointer;
+				font-weight: bold;
+				transition: transform 0.3s ease;
+			}
+			
+			.hydrophobic {
+				background-color: #ffcc00;
+			}
+			
+			.hydrophilic {
+				background-color: #66ccff;
+			}
+			
+			.polar {
+				background-color: #ff6666;
+			}
+			
+			.folded {
+				transform: scale(0.8);
+				box-shadow: 0 0 5px rgba(0,0,0,0.3);
+			}
+			
+			#score-container {
+				text-align: center;
+				margin: 20px 0;
+				font-size: 1.2em;
+			}
+			
+			#controls {
+				display: flex;
+				justify-content: center;
+				gap: 10px;
+				margin: 20px 0;
+			}
+			
+			button {
+				padding: 10px 20px;
+				border: none;
+				border-radius: 5px;
+				background-color: #4CAF50;
+				color: white;
+				cursor: pointer;
+				font-size: 1em;
+			}
+			
+			button:hover {
+				background-color: #45a049;
+			}
+			
+			#instructions {
+				margin: 20px 0;
+				padding: 15px;
+				background-color: #e9f7ef;
+				border-radius: 5px;
+			}
+			
+			.connection {
+				height: 2px;
+				background-color: #333;
+				position: absolute;
+				transform-origin: left center;
+			}
+		</style>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="index.html" class="logo"><strong>YIQUAN WANG</strong></a>
+									<ul class="icons">
+										<li><a href="https://twitter.com/Yiquan_W" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+										<li><a href="facebook.com/yiquanW/" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+										<li><a href="https://github.com/Wangyiquan95" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+										<li><a href="https://www.instagram.com/yiquan1995/" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+										<li><a href="https://www.linkedin.com/in/yiquan-w" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Protein Folding Challenge</h1>
+									</header>
+
+									<p>Welcome to the Protein Folding Challenge! In this game, you'll learn about how proteins fold into their functional 3D structures based on the properties of their amino acids.</p>
+									
+									<div id="game-container">
+										<div id="instructions">
+											<h3>How to Play:</h3>
+											<p>1. Click on amino acids to fold them into a stable structure.</p>
+											<p>2. Hydrophobic amino acids (yellow) prefer to be together in the core.</p>
+											<p>3. Hydrophilic amino acids (blue) prefer to be on the outside.</p>
+											<p>4. Polar amino acids (red) can form bonds with other polar amino acids.</p>
+											<p>5. Try to create a stable protein with the highest possible score!</p>
+										</div>
+										
+										<div id="controls">
+											<button id="new-game">New Protein</button>
+											<button id="fold-all">Auto-Fold</button>
+											<button id="reset">Reset</button>
+										</div>
+										
+										<div id="score-container">
+											<p>Stability Score: <span id="score">0</span></p>
+											<p>Level: <span id="level">1</span></p>
+										</div>
+										
+										<div id="protein-chain"></div>
+									</div>
+
+									<h3>The Science Behind Protein Folding</h3>
+									<p>Proteins are essential macromolecules that perform a vast array of functions within living organisms. The function of a protein is determined by its three-dimensional structure, which is in turn determined by its amino acid sequence.</p>
+									
+									<p>Protein folding is driven by various forces including:</p>
+									<ul>
+										<li><strong>Hydrophobic interactions</strong>: Non-polar amino acids tend to cluster in the core of the protein, away from water.</li>
+										<li><strong>Hydrogen bonding</strong>: Forms between polar amino acids, stabilizing the structure.</li>
+										<li><strong>Electrostatic interactions</strong>: Attractions between oppositely charged amino acids.</li>
+										<li><strong>Van der Waals forces</strong>: Weak attractions between atoms in close proximity.</li>
+									</ul>
+									
+									<p>Understanding protein folding is crucial for many areas of biology and medicine, including drug design and understanding diseases caused by protein misfolding, such as Alzheimer's and Parkinson's.</p>
+								</section>
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+
+							<!-- Search -->
+								<section id="search" class="alt">
+									<form id="form" role="search">
+										<input type="text" name="query" id="query" placeholder="Search" aria-label="Search through site content"/>
+									</form>
+								</section>
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="index.html">Home</a></li>
+										<li><a href="about.html">About me</a></li>
+										<li><a href="research.html">Research</a></li>
+										<li><a href="ideagenerator.html">Idea Generator</a></li>
+										<li><a href="database.html">Database</a></li>
+										<li><a href="BIO-GAME.html">BIO-GAME</a></li>
+										<li>
+											<span class="opener">Bio-art</span>
+											<ul>
+												<li><a href="biopainting.html">Bio-painting</a></li>
+												<li><a href="3Dmodel.html">3Dmodel</a></li>
+												<li><a href="cover.html">Cover</a></li>
+												<li><a href="biovideo.html">Bio-video</a></li>
+											</ul>
+										</li>
+									</ul>
+								</nav>
+
+							<!-- Section -->
+								<section>
+									<header class="major">
+										<h2>Get in touch</h2>
+									</header>
+									<p>leave me a message</p>
+									<ul class="contact">
+										<li class="icon solid fa-envelope"><a href="mailto:yiquan2@illinois.edu">yiquan2@illinois.edu</a></li>
+										<li class="icon solid fa-phone">(217) 721-4325</li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<p class="copyright">&copy; Yiquan Wang. All rights reserved. </p>
+								</footer>
+
+						</div>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script>
+				document.addEventListener('DOMContentLoaded', function() {
+					const proteinChain = document.getElementById('protein-chain');
+					const scoreDisplay = document.getElementById('score');
+					const levelDisplay = document.getElementById('level');
+					const newGameButton = document.getElementById('new-game');
+					const foldAllButton = document.getElementById('fold-all');
+					const resetButton = document.getElementById('reset');
+					
+					let aminoAcids = [];
+					let score = 0;
+					let level = 1;
+					let chainLength = 10; // Starting length
+					
+					// Amino acid types
+					const types = ['hydrophobic', 'hydrophilic', 'polar'];
+					const letters = {
+						'hydrophobic': ['A', 'I', 'L', 'M', 'F', 'V', 'P', 'G'],
+						'hydrophilic': ['R', 'N', 'D', 'C', 'Q', 'E', 'H', 'K', 'S', 'T'],
+						'polar': ['Y', 'W']
+					};
+					
+					function createProtein() {
+						proteinChain.innerHTML = '';
+						aminoAcids = [];
+						score = 0;
+						updateScore();
+						
+						for (let i = 0; i < chainLength; i++) {
+							const type = types[Math.floor(Math.random() * types.length)];
+							const letter = letters[type][Math.floor(Math.random() * letters[type].length)];
+							
+							const aminoAcid = document.createElement('div');
+							aminoAcid.className = `amino-acid ${type}`;
+							aminoAcid.textContent = letter;
+							aminoAcid.dataset.type = type;
+							aminoAcid.dataset.index = i;
+							aminoAcid.dataset.folded = 'false';
+							
+							aminoAcid.addEventListener('click', function() {
+								toggleFold(this);
+								calculateScore();
+							});
+							
+							proteinChain.appendChild(aminoAcid);
+							aminoAcids.push(aminoAcid);
+						}
+					}
+					
+					function toggleFold(aminoAcid) {
+						const isFolded = aminoAcid.dataset.folded === 'true';
+						aminoAcid.dataset.folded = !isFolded;
+						
+						if (!isFolded) {
+							aminoAcid.classList.add('folded');
+						} else {
+							aminoAcid.classList.remove('folded');
+						}
+					}
+					
+					function calculateScore() {
+						score = 0;
+						
+						// Count hydrophobic interactions (hydrophobic amino acids that are folded)
+						const foldedHydrophobic = aminoAcids.filter(aa => 
+							aa.dataset.type === 'hydrophobic' && aa.dataset.folded === 'true'
+						).length;
+						
+						// Count hydrophilic amino acids that are not folded (exposed to water)
+						const exposedHydrophilic = aminoAcids.filter(aa => 
+							aa.dataset.type === 'hydrophilic' && aa.dataset.folded === 'false'
+						).length;
+						
+						// Count polar amino acids that are folded
+						const foldedPolar = aminoAcids.filter(aa => 
+							aa.dataset.type === 'polar' && aa.dataset.folded === 'true'
+						).length;
+						
+						// Calculate score based on correct folding patterns
+						score = (foldedHydrophobic * 10) + (exposedHydrophilic * 5) + (foldedPolar * 15);
+						
+						updateScore();
+						
+						// Check if level completed
+						const maxPossibleScore = (aminoAcids.filter(aa => aa.dataset.type === 'hydrophobic').length * 10) +
+												(aminoAcids.filter(aa => aa.dataset.type === 'hydrophilic').length * 5) +
+												(aminoAcids.filter(aa => aa.dataset.type === 'polar').length * 15);
+						
+						if (score >= maxPossibleScore * 0.8) {
+							levelUp();
+						}
+					}
+					
+					function updateScore() {
+						scoreDisplay.textContent = score;
+					}
+					
+					function levelUp() {
+						level++;
+						levelDisplay.textContent = level;
+						chainLength += 2; // Increase protein length for next level
+						
+						setTimeout(() => {
+							alert(`Congratulations! You've reached level ${level}. The protein is now stable!`);
+							createProtein();
+						}, 500);
+					}
+					
+					function autoFold() {
+						// Simple auto-fold strategy
+						aminoAcids.forEach(aa => {
+							if (aa.dataset.type === 'hydrophobic' || aa.dataset.type === 'polar') {
+								if (aa.dataset.folded === 'false') {
+									toggleFold(aa);
+								}
+							} else if (aa.dataset.type === 'hydrophilic') {
+								if (aa.dataset.folded === 'true') {
+									toggleFold(aa);
+								}
+							}
+						});
+						
+						calculateScore();
+					}
+					
+					function resetGame() {
+						aminoAcids.forEach(aa => {
+							if (aa.dataset.folded === 'true') {
+								toggleFold(aa);
+							}
+						});
+						
+						score = 0;
+						updateScore();
+					}
+					
+					// Event listeners
+					newGameButton.addEventListener('click', createProtein);
+					foldAllButton.addEventListener('click', autoFold);
+					resetButton.addEventListener('click', resetGame);
+					
+					// Initialize game
+					createProtein();
+				});
+			</script>
+	</body>
+</html>

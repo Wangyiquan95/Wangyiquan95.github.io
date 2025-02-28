@@ -1,0 +1,638 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Evolution Simulator - Yiquan Wang</title>
+		<link rel="icon" type="image/png" href="images/favicon/android-chrome-512x512.png" />
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<style>
+			#game-container {
+				width: 100%;
+				max-width: 800px;
+				margin: 0 auto;
+				padding: 20px;
+				background-color: #f5f5f5;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0,0,0,0.1);
+			}
+			
+			#simulation-area {
+				width: 100%;
+				height: 400px;
+				background-color: #e0f7fa;
+				border-radius: 5px;
+				position: relative;
+				overflow: hidden;
+				margin: 20px 0;
+			}
+			
+			.organism {
+				position: absolute;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: bold;
+				transition: all 0.5s ease;
+			}
+			
+			#controls {
+				display: flex;
+				justify-content: center;
+				gap: 10px;
+				margin: 20px 0;
+			}
+			
+			button {
+				padding: 10px 20px;
+				border: none;
+				border-radius: 5px;
+				background-color: #4CAF50;
+				color: white;
+				cursor: pointer;
+				font-size: 1em;
+			}
+			
+			button:hover {
+				background-color: #45a049;
+			}
+			
+			#stats {
+				display: flex;
+				justify-content: space-around;
+				margin: 20px 0;
+				flex-wrap: wrap;
+			}
+			
+			.stat-box {
+				background-color: #fff;
+				padding: 10px;
+				border-radius: 5px;
+				box-shadow: 0 0 5px rgba(0,0,0,0.1);
+				min-width: 150px;
+				margin: 5px;
+			}
+			
+			#environment-controls {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 10px;
+				margin: 20px 0;
+			}
+			
+			.env-control {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				background-color: #fff;
+				padding: 10px;
+				border-radius: 5px;
+				box-shadow: 0 0 5px rgba(0,0,0,0.1);
+			}
+			
+			.food {
+				position: absolute;
+				width: 10px;
+				height: 10px;
+				background-color: #8bc34a;
+				border-radius: 50%;
+			}
+			
+			#instructions {
+				margin: 20px 0;
+				padding: 15px;
+				background-color: #e9f7ef;
+				border-radius: 5px;
+			}
+			
+			#generation-display {
+				text-align: center;
+				font-size: 1.5em;
+				margin: 10px 0;
+			}
+		</style>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="index.html" class="logo"><strong>YIQUAN WANG</strong></a>
+									<ul class="icons">
+										<li><a href="https://twitter.com/Yiquan_W" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+										<li><a href="facebook.com/yiquanW/" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+										<li><a href="https://github.com/Wangyiquan95" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+										<li><a href="https://www.instagram.com/yiquan1995/" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+										<li><a href="https://www.linkedin.com/in/yiquan-w" class="icon brands fa-linkedin-in"><span class="label">LinkedIn</span></a></li>
+									</ul>
+								</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Evolution Simulator</h1>
+									</header>
+
+									<p>Welcome to the Evolution Simulator! Watch how organisms evolve over generations as they adapt to their environment. Control environmental factors and observe natural selection in action.</p>
+									
+									<div id="game-container">
+										<div id="instructions">
+											<h3>How to Play:</h3>
+											<p>1. Start the simulation to watch organisms move around and consume food.</p>
+											<p>2. Organisms with better traits (speed, size, sense) will survive longer and reproduce.</p>
+											<p>3. Change environmental factors to see how organisms adapt over generations.</p>
+											<p>4. Observe how traits evolve in response to selective pressures.</p>
+										</div>
+										
+										<div id="generation-display">Generation: <span id="generation">0</span></div>
+										
+										<div id="simulation-area"></div>
+										
+										<div id="stats">
+											<div class="stat-box">
+												<h4>Population</h4>
+												<p><span id="population">0</span> organisms</p>
+											</div>
+											<div class="stat-box">
+												<h4>Average Speed</h4>
+												<p><span id="avg-speed">0</span></p>
+											</div>
+											<div class="stat-box">
+												<h4>Average Size</h4>
+												<p><span id="avg-size">0</span></p>
+											</div>
+											<div class="stat-box">
+												<h4>Average Sense</h4>
+												<p><span id="avg-sense">0</span></p>
+											</div>
+										</div>
+										
+										<div id="environment-controls">
+											<div class="env-control">
+												<label for="food-amount">Food Abundance</label>
+												<input type="range" id="food-amount" min="5" max="50" value="20">
+											</div>
+											<div class="env-control">
+												<label for="predator-presence">Predator Pressure</label>
+												<input type="range" id="predator-presence" min="0" max="10" value="0">
+											</div>
+											<div class="env-control">
+												<label for="mutation-rate">Mutation Rate</label>
+												<input type="range" id="mutation-rate" min="1" max="20" value="5">
+											</div>
+										</div>
+										
+										<div id="controls">
+											<button id="start-btn">Start Simulation</button>
+											<button id="pause-btn" disabled>Pause</button>
+											<button id="reset-btn">Reset</button>
+										</div>
+									</div>
+
+									<h3>The Science of Evolution</h3>
+									<p>Evolution is the process by which populations of organisms change over successive generations. The key mechanisms of evolution include:</p>
+									
+									<ul>
+										<li><strong>Natural Selection</strong>: Individuals with traits better suited to their environment are more likely to survive and reproduce.</li>
+										<li><strong>Genetic Variation</strong>: Differences in DNA among individuals provide the raw material for evolution.</li>
+										<li><strong>Mutation</strong>: Random changes in DNA that create new genetic variations.</li>
+										<li><strong>Genetic Drift</strong>: Random changes in trait frequency, especially in small populations.</li>
+										<li><strong>Gene Flow</strong>: The transfer of genetic material from one population to another.</li>
+									</ul>
+									
+									<p>In this simulation, you can observe how traits like speed, size, and sensory ability evolve in response to environmental pressures such as food availability and predation.</p>
+								</section>
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+
+							<!-- Search -->
+								<section id="search" class="alt">
+									<form id="form" role="search">
+										<input type="text" name="query" id="query" placeholder="Search" aria-label="Search through site content"/>
+									</form>
+								</section>
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="index.html">Home</a></li>
+										<li><a href="about.html">About me</a></li>
+										<li><a href="research.html">Research</a></li>
+										<li><a href="ideagenerator.html">Idea Generator</a></li>
+										<li><a href="database.html">Database</a></li>
+										<li><a href="BIO-GAME.html">BIO-GAME</a></li>
+										<li>
+											<span class="opener">Bio-art</span>
+											<ul>
+												<li><a href="biopainting.html">Bio-painting</a></li>
+												<li><a href="3Dmodel.html">3Dmodel</a></li>
+												<li><a href="cover.html">Cover</a></li>
+												<li><a href="biovideo.html">Bio-video</a></li>
+											</ul>
+										</li>
+									</ul>
+								</nav>
+
+							<!-- Section -->
+								<section>
+									<header class="major">
+										<h2>Get in touch</h2>
+									</header>
+									<p>leave me a message</p>
+									<ul class="contact">
+										<li class="icon solid fa-envelope"><a href="mailto:yiquan2@illinois.edu">yiquan2@illinois.edu</a></li>
+										<li class="icon solid fa-phone">(217) 721-4325</li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<p class="copyright">&copy; Yiquan Wang. All rights reserved. </p>
+								</footer>
+
+						</div>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script>
+				document.addEventListener('DOMContentLoaded', function() {
+					// DOM elements
+					const simulationArea = document.getElementById('simulation-area');
+					const startBtn = document.getElementById('start-btn');
+					const pauseBtn = document.getElementById('pause-btn');
+					const resetBtn = document.getElementById('reset-btn');
+					const generationDisplay = document.getElementById('generation');
+					const populationDisplay = document.getElementById('population');
+					const avgSpeedDisplay = document.getElementById('avg-speed');
+					const avgSizeDisplay = document.getElementById('avg-size');
+					const avgSenseDisplay = document.getElementById('avg-sense');
+					const foodAmountSlider = document.getElementById('food-amount');
+					const predatorPresenceSlider = document.getElementById('predator-presence');
+					const mutationRateSlider = document.getElementById('mutation-rate');
+					
+					// Simulation variables
+					let organisms = [];
+					let foods = [];
+					let predators = [];
+					let generation = 0;
+					let simulationRunning = false;
+					let simulationInterval;
+					let foodInterval;
+					let predatorInterval;
+					let generationInterval;
+					
+					// Environment settings
+					let foodAmount = parseInt(foodAmountSlider.value);
+					let predatorPresence = parseInt(predatorPresenceSlider.value);
+					let mutationRate = parseInt(mutationRateSlider.value) / 100;
+					
+					// Colors based on traits
+					const getColor = (speed, size, sense) => {
+						const r = Math.floor(speed * 255 / 10);
+						const g = Math.floor(size * 255 / 10);
+						const b = Math.floor(sense * 255 / 10);
+						return `rgb(${r}, ${g}, ${b})`;
+					};
+					
+					// Create an organism
+					const createOrganism = (x, y, speed, size, sense) => {
+						const organism = document.createElement('div');
+						organism.className = 'organism';
+						organism.style.left = `${x}px`;
+						organism.style.top = `${y}px`;
+						organism.style.width = `${size * 5}px`;
+						organism.style.height = `${size * 5}px`;
+						organism.style.backgroundColor = getColor(speed, size, sense);
+						
+						simulationArea.appendChild(organism);
+						
+						return {
+							element: organism,
+							x,
+							y,
+							speed,
+							size,
+							sense,
+							energy: 100,
+							direction: Math.random() * 2 * Math.PI,
+							age: 0
+						};
+					};
+					
+					// Create food
+					const createFood = () => {
+						const food = document.createElement('div');
+						food.className = 'food';
+						const x = Math.random() * (simulationArea.offsetWidth - 10);
+						const y = Math.random() * (simulationArea.offsetHeight - 10);
+						food.style.left = `${x}px`;
+						food.style.top = `${y}px`;
+						
+						simulationArea.appendChild(food);
+						
+						return {
+							element: food,
+							x,
+							y
+						};
+					};
+					
+					// Initialize simulation
+					const initSimulation = () => {
+						// Clear previous simulation
+						simulationArea.innerHTML = '';
+						organisms = [];
+						foods = [];
+						predators = [];
+						generation = 0;
+						generationDisplay.textContent = generation;
+						
+						// Create initial organisms
+						for (let i = 0; i < 10; i++) {
+							const x = Math.random() * (simulationArea.offsetWidth - 30);
+							const y = Math.random() * (simulationArea.offsetHeight - 30);
+							const speed = 3 + Math.random() * 4; // 3-7
+							const size = 3 + Math.random() * 4;  // 3-7
+							const sense = 3 + Math.random() * 4; // 3-7
+							
+							organisms.push(createOrganism(x, y, speed, size, sense));
+						}
+						
+						// Create initial food
+						for (let i = 0; i < foodAmount; i++) {
+							foods.push(createFood());
+						}
+						
+						updateStats();
+					};
+					
+					// Update statistics
+					const updateStats = () => {
+						populationDisplay.textContent = organisms.length;
+						
+						if (organisms.length > 0) {
+							const totalSpeed = organisms.reduce((sum, org) => sum + org.speed, 0);
+							const totalSize = organisms.reduce((sum, org) => sum + org.size, 0);
+							const totalSense = organisms.reduce((sum, org) => sum + org.sense, 0);
+							
+							avgSpeedDisplay.textContent = (totalSpeed / organisms.length).toFixed(2);
+							avgSizeDisplay.textContent = (totalSize / organisms.length).toFixed(2);
+							avgSenseDisplay.textContent = (totalSense / organisms.length).toFixed(2);
+						} else {
+							avgSpeedDisplay.textContent = "0";
+							avgSizeDisplay.textContent = "0";
+							avgSenseDisplay.textContent = "0";
+						}
+					};
+					
+					// Move organisms
+					const moveOrganisms = () => {
+						organisms.forEach(organism => {
+							// Change direction occasionally
+							if (Math.random() < 0.05) {
+								organism.direction = Math.random() * 2 * Math.PI;
+							}
+							
+							// Find nearest food if within sensing range
+							let nearestFood = null;
+							let minDistance = organism.sense * 20;
+							
+							foods.forEach(food => {
+								const dx = food.x - organism.x;
+								const dy = food.y - organism.y;
+								const distance = Math.sqrt(dx * dx + dy * dy);
+								
+								if (distance < minDistance) {
+									minDistance = distance;
+									nearestFood = food;
+								}
+							});
+							
+							// Move toward food if sensed
+							if (nearestFood) {
+								const dx = nearestFood.x - organism.x;
+								const dy = nearestFood.y - organism.y;
+								organism.direction = Math.atan2(dy, dx);
+							}
+							
+							// Move in current direction
+							const dx = Math.cos(organism.direction) * organism.speed;
+							const dy = Math.sin(organism.direction) * organism.speed;
+							
+							organism.x += dx;
+							organism.y += dy;
+							
+							// Boundary checking
+							if (organism.x < 0) organism.x = 0;
+							if (organism.y < 0) organism.y = 0;
+							if (organism.x > simulationArea.offsetWidth - organism.size * 5) {
+								organism.x = simulationArea.offsetWidth - organism.size * 5;
+							}
+							if (organism.y > simulationArea.offsetHeight - organism.size * 5) {
+								organism.y = simulationArea.offsetHeight - organism.size * 5;
+							}
+							
+							// Update position
+							organism.element.style.left = `${organism.x}px`;
+							organism.element.style.top = `${organism.y}px`;
+							
+							// Consume energy (larger organisms consume more)
+							organism.energy -= 0.1 * (organism.size / 3);
+							
+							// Age
+							organism.age += 1;
+						});
+					};
+					
+					// Check for food consumption
+					const checkFoodConsumption = () => {
+						organisms.forEach(organism => {
+							const organismRadius = organism.size * 2.5;
+							
+							foods.forEach((food, index) => {
+								const dx = food.x - organism.x;
+								const dy = food.y - organism.y;
+								const distance = Math.sqrt(dx * dx + dy * dy);
+								
+								if (distance < organismRadius) {
+									// Consume food
+									organism.energy += 25;
+									
+									// Remove food
+									simulationArea.removeChild(food.element);
+									foods.splice(index, 1);
+									
+									// Possibly reproduce if enough energy
+									if (organism.energy > 150 && organisms.length < 50) {
+										reproduceOrganism(organism);
+										organism.energy -= 50;
+									}
+								}
+							});
+						});
+					};
+					
+					// Reproduce with possible mutations
+					const reproduceOrganism = (parent) => {
+						// Create child with similar traits but with possible mutations
+						let childSpeed = parent.speed;
+						let childSize = parent.size;
+						let childSense = parent.sense;
+						
+						// Apply mutations
+						if (Math.random() < mutationRate) {
+							childSpeed += (Math.random() - 0.5) * 2;
+							childSpeed = Math.max(1, Math.min(10, childSpeed));
+						}
+						
+						if (Math.random() < mutationRate) {
+							childSize += (Math.random() - 0.5) * 2;
+							childSize = Math.max(1, Math.min(10, childSize));
+						}
+						
+						if (Math.random() < mutationRate) {
+							childSense += (Math.random() - 0.5) * 2;
+							childSense = Math.max(1, Math.min(10, childSense));
+						}
+						
+						// Create child near parent
+						const childX = parent.x + (Math.random() - 0.5) * 20;
+						const childY = parent.y + (Math.random() - 0.5) * 20;
+						
+						organisms.push(createOrganism(childX, childY, childSpeed, childSize, childSense));
+					};
+					
+					// Check for organism death
+					const checkOrganismDeath = () => {
+						for (let i = organisms.length - 1; i >= 0; i--) {
+							const organism = organisms[i];
+							
+							// Die if no energy or too old
+							if (organism.energy <= 0 || organism.age > 1000) {
+								simulationArea.removeChild(organism.element);
+								organisms.splice(i, 1);
+							}
+							
+							// Check for predator attacks
+							if (predatorPresence > 0 && Math.random() < 0.001 * predatorPresence) {
+								// Smaller, slower organisms are more likely to be caught
+								const survivalChance = (organism.speed + organism.size) / 20;
+								if (Math.random() > survivalChance) {
+									simulationArea.removeChild(organism.element);
+									organisms.splice(i, 1);
+								}
+							}
+						}
+					};
+					
+					// Add new food periodically
+					const addFood = () => {
+						if (foods.length < foodAmount) {
+							foods.push(createFood());
+						}
+					};
+					
+					// Advance to next generation
+					const advanceGeneration = () => {
+						generation++;
+						generationDisplay.textContent = generation;
+						
+						// If all organisms died, create new ones
+						if (organisms.length === 0) {
+							for (let i = 0; i < 5; i++) {
+								const x = Math.random() * (simulationArea.offsetWidth - 30);
+								const y = Math.random() * (simulationArea.offsetHeight - 30);
+								const speed = 3 + Math.random() * 4;
+								const size = 3 + Math.random() * 4;
+								const sense = 3 + Math.random() * 4;
+								
+								organisms.push(createOrganism(x, y, speed, size, sense));
+							}
+						}
+					};
+					
+					// Run simulation
+					const runSimulation = () => {
+						moveOrganisms();
+						checkFoodConsumption();
+						checkOrganismDeath();
+						updateStats();
+					};
+					
+					// Start simulation
+					const startSimulation = () => {
+						if (!simulationRunning) {
+							simulationRunning = true;
+							startBtn.disabled = true;
+							pauseBtn.disabled = false;
+							
+							simulationInterval = setInterval(runSimulation, 50);
+							foodInterval = setInterval(addFood, 1000);
+							generationInterval = setInterval(advanceGeneration, 10000);
+						}
+					};
+					
+					// Pause simulation
+					const pauseSimulation = () => {
+						if (simulationRunning) {
+							simulationRunning = false;
+							startBtn.disabled = false;
+							pauseBtn.disabled = true;
+							
+							clearInterval(simulationInterval);
+							clearInterval(foodInterval);
+							clearInterval(generationInterval);
+						}
+					};
+					
+					// Reset simulation
+					const resetSimulation = () => {
+						pauseSimulation();
+						initSimulation();
+					};
+					
+					// Event listeners
+					startBtn.addEventListener('click', startSimulation);
+					pauseBtn.addEventListener('click', pauseSimulation);
+					resetBtn.addEventListener('click', resetSimulation);
+					
+					foodAmountSlider.addEventListener('change', function() {
+						foodAmount = parseInt(this.value);
+					});
+					
+					predatorPresenceSlider.addEventListener('change', function() {
+						predatorPresence = parseInt(this.value);
+					});
+					
+					mutationRateSlider.addEventListener('change', function() {
+						mutationRate = parseInt(this.value) / 100;
+					});
+					
+					// Initialize on load
+					initSimulation();
+				});
+			</script>
+	</body>
+</html>
