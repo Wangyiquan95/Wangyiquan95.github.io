@@ -84,6 +84,21 @@
                     ". up ."
                     "left . right"
                     ". down .";
+                gap: 15px;
+            }
+
+            .control-btn {
+                width: 70px;
+                height: 70px;
+                font-size: 28px;
+                background: rgba(0, 0, 0, 0.1);
+                border: 3px solid #555;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+
+            .control-btn:active {
+                background: rgba(0, 0, 0, 0.3);
+                transform: scale(0.95);
             }
         }
     </style>
@@ -172,23 +187,16 @@
 
         function updateHighScores() {
             const scoreList = document.getElementById('scoreList');
-            scoreList.innerHTML = highScores
-                .slice(0, 3)
-                .map((score, index) => `
-                    <div class="highScore">${index + 1}. ${score.name}: ${score.score}</div>
-                `)
-                .join('');
+            scoreList.innerHTML = `<div class="highScore">Highest Score: ${highScores.score || 0} (${highScores.name || 'None'})</div>`;
         }
 
         function checkHighScore(score) {
-            const isHighScore = highScores.length < 3 || score > highScores[highScores.length - 1]?.score;
+            const isHighScore = !highScores.score || score > highScores.score;
 
             if (isHighScore) {
-                const name = prompt('Congratulations! You got a high score! Enter your name:');
+                const name = prompt('Congratulations! New high score! Enter your name:');
                 if (name) {
-                    highScores.push({ name, score });
-                    highScores.sort((a, b) => b.score - a.score);
-                    highScores = highScores.slice(0, 3);
+                    highScores = { name, score };
                     localStorage.setItem('rnaSnakeHighScores', JSON.stringify(highScores));
                     updateHighScores();
                 }
@@ -262,28 +270,67 @@
         });
 
         document.querySelectorAll('.control-btn').forEach(button => {
-            button.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                const newDirection = {
-                    '↑': 'up',
-                    '↓': 'down',
-                    '←': 'left',
-                    '→': 'right'
-                }[e.target.textContent];
+            ['touchstart', 'mousedown'].forEach(eventType => {
+                button.addEventListener(eventType, (e) => {
+                    e.preventDefault();
+                    const newDirection = {
+                        '↑': 'up',
+                        '↓': 'down',
+                        '←': 'left',
+                        '→': 'right'
+                    }[e.target.textContent];
 
-                if (
-                    (newDirection === 'up' && direction !== 'down') ||
-                    (newDirection === 'down' && direction !== 'up') ||
-                    (newDirection === 'left' && direction !== 'right') ||
-                    (newDirection === 'right' && direction !== 'left')
-                ) {
-                    direction = newDirection;
-                }
+                    if (
+                        (newDirection === 'up' && direction !== 'down') ||
+                        (newDirection === 'down' && direction !== 'up') ||
+                        (newDirection === 'left' && direction !== 'right') ||
+                        (newDirection === 'right' && direction !== 'left')
+                    ) {
+                        direction = newDirection;
+                    }
+                });
             });
         });
 
+        // Add swipe controls for mobile
+        let touchStartX = 0;
+        let touchStartY = 0;
+
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
+
+            // Determine if the swipe was horizontal or vertical
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                // Horizontal swipe
+                if (diffX > 0 && direction !== 'left') {
+                    direction = 'right';
+                } else if (diffX < 0 && direction !== 'right') {
+                    direction = 'left';
+                }
+            } else {
+                // Vertical swipe
+                if (diffY > 0 && direction !== 'up') {
+                    direction = 'down';
+                } else if (diffY < 0 && direction !== 'down') {
+                    direction = 'up';
+                }
+            }
         }, { passive: false });
 
         setInterval(gameLoop, 100);
