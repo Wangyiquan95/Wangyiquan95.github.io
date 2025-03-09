@@ -449,23 +449,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }).catch(error => {
         console.error("Error loading images:", error);
     });
+
+    // Add restart functionality
+    document.getElementById('restart-button').addEventListener('click', function() {
+        if (confirm('Are you sure you want to restart the game?')) {
+            location.reload();
+        }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        // Update mobile status
+        const newIsMobile = window.innerWidth <= 768;
+        if (newIsMobile !== isMobile) {
+            // Reload the page if mobile status changed
+            location.reload();
+        }
+    });
 });
 
-// Add this near the end of your DOMContentLoaded event handler:
-
-// Add restart functionality
-document.getElementById('restart-button').addEventListener('click', function() {
-    if (confirm('Are you sure you want to restart the game?')) {
-        location.reload();
-    }
-});
-
-// Handle window resize
-window.addEventListener('resize', function() {
-    // Update mobile status
-    const newIsMobile = window.innerWidth <= 768;
-    if (newIsMobile !== isMobile) {
-        // Reload the page if mobile status changed
-        location.reload();
-    }
-});
+// Remove this code that was outside the DOMContentLoaded handler
+// window.addEventListener('resize', function() {
+//     // Update mobile status
+//     const newIsMobile = window.innerWidth <= 768;
+//     if (newIsMobile !== isMobile) {
+//         // Reload the page if mobile status changed
+//         location.reload();
+//     }
+// });
