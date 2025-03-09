@@ -273,47 +273,90 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Handle mouse/touch click/tap to drop fruit
-    function handlePointerDown() {
+    // Handle mouse click to drop fruit (desktop only)
+    function handleMouseClick() {
         if (currentFruit && canDropFruit && !gameOver) {
-            // Enable gravity for the current fruit
-            Body.setStatic(currentFruit, false);
-
-            // Play drop sound
-            dropSound.currentTime = 0;
-            dropSound.play().catch(e => console.log("Audio play error:", e));
-
-            // Prevent dropping another fruit until this one settles
-            canDropFruit = false;
-
-            // Set a timeout to create a new fruit
-            setTimeout(function() {
-                if (!gameOver) {
-                    currentFruit = createFruit(gameWidth/2, 50, nextFruit);
-                    Body.setStatic(currentFruit, true);
-                    World.add(world, currentFruit);
-
-                    nextFruit = getRandomFruit();
-                    drawNextFruit();
-
-                    canDropFruit = true;
-                }
-            }, 500);
+            dropCurrentFruit();
         }
     }
 
-    // Add event listeners for both mouse and touch
-    canvas.addEventListener('mousemove', handlePointerMove);
-    canvas.addEventListener('touchmove', function(e) {
-        e.preventDefault(); // Prevent scrolling when touching the canvas
-        handlePointerMove(e);
-    });
+    // Handle touch start (mobile only)
+    function handleTouchStart(event) {
+        event.preventDefault(); // Prevent double tap to zoom
 
-    canvas.addEventListener('click', handlePointerDown);
-    canvas.addEventListener('touchstart', function(e) {
-        e.preventDefault(); // Prevent double tap to zoom
-        handlePointerDown(e);
-    });
+        if (currentFruit && canDropFruit && !gameOver) {
+            // Start tracking touch position
+            const rect = canvas.getBoundingClientRect();
+            const clientX = event.touches[0].clientX;
+            const x = clientX - rect.left;
+
+            // Constrain x position
+            const constrainedX = Math.max(
+                currentFruit.fruitType.radius + 10,
+                Math.min(gameWidth - currentFruit.fruitType.radius - 10, x)
+            );
+
+            Body.setPosition(currentFruit, { x: constrainedX, y: 50 });
+        }
+    }
+
+    // Handle touch end (mobile only)
+    function handleTouchEnd(event) {
+        event.preventDefault();
+
+        if (currentFruit && canDropFruit && !gameOver) {
+            dropCurrentFruit();
+        }
+    }
+
+    // Common function to drop the current fruit
+    function dropCurrentFruit() {
+        // Enable gravity for the current fruit
+        Body.setStatic(currentFruit, false);
+
+        // Play drop sound
+        dropSound.currentTime = 0;
+        dropSound.play().catch(e => console.log("Audio play error:", e));
+
+        // Prevent dropping another fruit until this one settles
+        canDropFruit = false;
+
+        // Set a timeout to create a new fruit
+        setTimeout(function() {
+            if (!gameOver) {
+                currentFruit = createFruit(gameWidth/2, 50, nextFruit);
+                Body.setStatic(currentFruit, true);
+                World.add(world, currentFruit);
+
+                nextFruit = getRandomFruit();
+                drawNextFruit();
+
+                canDropFruit = true;
+            }
+        }, 500);
+    }
+
+    // Detect if device supports touch
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    // Add appropriate event listeners based on device type
+    if (isTouchDevice) {
+        // Touch device - use touch events
+        canvas.addEventListener('touchmove', handlePointerMove);
+        canvas.addEventListener('touchstart', handleTouchStart);
+        canvas.addEventListener('touchend', handleTouchEnd);
+    } else {
+        // Desktop device - use mouse events
+        canvas.addEventListener('mousemove', handlePointerMove);
+        canvas.addEventListener('click', handleMouseClick);
+    }
+
+    // Remove the old event listeners that we're replacing
+    // canvas.addEventListener('click', handlePointerDown);
+    // canvas.addEventListener('touchstart', function(e) {
+    //     e.preventDefault();
+    //     handlePointerDown(e);
+    // });
 
     // Check for collisions between fruits
     Events.on(engine, 'collisionStart', function(event) {
@@ -426,9 +469,3 @@ window.addEventListener('resize', function() {
         location.reload();
     }
 });
-
-// Update the drop line position in the DOM
-const dropLine = document.querySelector('.drop-line');
-if (dropLine) {
-    dropLine.style.top = dropLineY + 'px';
-}
