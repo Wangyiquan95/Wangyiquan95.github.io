@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'peach', radius: 75, color: '#FFCC99', points: 28, nextSize: 'pineapple', imagePath: 'images/nature.png' },
         { name: 'pineapple', radius: 85, color: '#FFFF00', points: 36, nextSize: 'melon', imagePath: 'images/cell.png' },
         { name: 'melon', radius: 95, color: '#00FF00', points: 45, nextSize: 'watermelon', imagePath: 'images/nobel_prize.png' },
-        { name: 'watermelon', radius: 105, color: '#00AA00', points: 55, nextSize: null, imagePath: 'images/money.jpg' }
+        { name: 'watermelon', radius: 105, color: '#00AA00', points: 55, nextSize: null, imagePath: 'images/money.png' }
     ];
     
     // Preload all fruit images
