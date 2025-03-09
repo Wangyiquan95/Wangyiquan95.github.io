@@ -258,73 +258,49 @@ document.addEventListener('DOMContentLoaded', function() {
             const rect = canvas.getBoundingClientRect();
             // Handle both mouse and touch events
             const clientX = event.clientX || (event.touches && event.touches[0] ? event.touches[0].clientX : null);
-            const clientY = event.clientY || (event.touches && event.touches[0] ? event.touches[0].clientY : null);
 
-            if (clientX !== null && clientY !== null) {
+            if (clientX !== null) {
                 const x = clientX - rect.left;
-                const y = clientY - rect.top;
 
-                // Only move the fruit if touch is above the red line
-                if (y < topBoundary) {
-                    // Constrain x position to keep fruit within walls
-                    const constrainedX = Math.max(
-                        currentFruit.fruitType.radius + 10,
-                        Math.min(gameWidth - currentFruit.fruitType.radius - 10, x)
-                    );
+                // Constrain x position to keep fruit within walls
+                const constrainedX = Math.max(
+                    currentFruit.fruitType.radius + 10,
+                    Math.min(gameWidth - currentFruit.fruitType.radius - 10, x)
+                );
 
-                    Body.setPosition(currentFruit, { x: constrainedX, y: 50 });
-                }
+                Body.setPosition(currentFruit, { x: constrainedX, y: 50 });
             }
         }
     }
 
     // Handle mouse/touch click/tap to drop fruit
-    function handlePointerDown(event) {
+    function handlePointerDown() {
         if (currentFruit && canDropFruit && !gameOver) {
-            const rect = canvas.getBoundingClientRect();
-            const clientY = event.clientY || (event.touches && event.touches[0] ? event.touches[0].clientY : null);
+            // Enable gravity for the current fruit
+            Body.setStatic(currentFruit, false);
 
-            if (clientY !== null) {
-                const y = clientY - rect.top;
+            // Play drop sound
+            dropSound.currentTime = 0;
+            dropSound.play().catch(e => console.log("Audio play error:", e));
 
-                // Drop the fruit only if touch is below the red line
-                if (y > topBoundary) {
-                    // Enable gravity for the current fruit
-                    Body.setStatic(currentFruit, false);
+            // Prevent dropping another fruit until this one settles
+            canDropFruit = false;
 
-                    // Play drop sound
-                    dropSound.currentTime = 0;
-                    dropSound.play().catch(e => console.log("Audio play error:", e));
+            // Set a timeout to create a new fruit
+            setTimeout(function() {
+                if (!gameOver) {
+                    currentFruit = createFruit(gameWidth/2, 50, nextFruit);
+                    Body.setStatic(currentFruit, true);
+                    World.add(world, currentFruit);
 
-                    // Prevent dropping another fruit until this one settles
-                    canDropFruit = false;
+                    nextFruit = getRandomFruit();
+                    drawNextFruit();
 
-                    // Set a timeout to create a new fruit
-                    setTimeout(function() {
-                        if (!gameOver) {
-                            currentFruit = createFruit(gameWidth/2, 50, nextFruit);
-                            Body.setStatic(currentFruit, true);
-                            World.add(world, currentFruit);
-
-                            nextFruit = getRandomFruit();
-                            drawNextFruit();
-
-                            canDropFruit = true;
-                        }
-                    }, 500);
+                    canDropFruit = true;
                 }
-            }
+            }, 500);
         }
     }
-
-    // Define the top boundary (red line position) once for consistent use
-    const topBoundary = isMobile ? 80 : 100;
-
-    // Update the drop line to be more visible on mobile
-    const dropLine = document.querySelector('.drop-line');
-    dropLine.style.top = topBoundary + 'px';
-    dropLine.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
-    dropLine.style.height = '3px';
 
     // Add event listeners for both mouse and touch
     canvas.addEventListener('mousemove', handlePointerMove);
@@ -336,57 +312,8 @@ document.addEventListener('DOMContentLoaded', function() {
     canvas.addEventListener('click', handlePointerDown);
     canvas.addEventListener('touchstart', function(e) {
         e.preventDefault(); // Prevent double tap to zoom
-        handlePointerMove(e); // Update position immediately on touch
-    });
-
-    canvas.addEventListener('touchend', function(e) {
-        e.preventDefault();
         handlePointerDown(e);
     });
-
-    // Add visual cues to help users understand the controls
-    function addTouchInstructions() {
-        if (isMobile) {
-            const instructionTop = document.createElement('div');
-            instructionTop.className = 'touch-instruction';
-            instructionTop.textContent = 'Touch here to position';
-            instructionTop.style.position = 'absolute';
-            instructionTop.style.top = '30px';
-            instructionTop.style.left = '50%';
-            instructionTop.style.transform = 'translateX(-50%)';
-            instructionTop.style.color = 'rgba(0, 0, 0, 0.5)';
-            instructionTop.style.fontSize = '14px';
-            instructionTop.style.pointerEvents = 'none';
-
-            const instructionBottom = document.createElement('div');
-            instructionBottom.className = 'touch-instruction';
-            instructionBottom.textContent = 'Touch here to drop';
-            instructionBottom.style.position = 'absolute';
-            instructionBottom.style.top = (topBoundary + 20) + 'px';
-            instructionBottom.style.left = '50%';
-            instructionBottom.style.transform = 'translateX(-50%)';
-            instructionBottom.style.color = 'rgba(0, 0, 0, 0.5)';
-            instructionBottom.style.fontSize = '14px';
-            instructionBottom.style.pointerEvents = 'none';
-
-            gameContainer.appendChild(instructionTop);
-            gameContainer.appendChild(instructionBottom);
-
-            // Fade out instructions after 5 seconds
-            setTimeout(() => {
-                instructionTop.style.transition = 'opacity 1s';
-                instructionBottom.style.transition = 'opacity 1s';
-                instructionTop.style.opacity = '0';
-                instructionBottom.style.opacity = '0';
-
-                // Remove from DOM after fade out
-                setTimeout(() => {
-                    gameContainer.removeChild(instructionTop);
-                    gameContainer.removeChild(instructionBottom);
-                }, 1000);
-            }, 5000);
-        }
-    }
 
     // Check for collisions between fruits
     Events.on(engine, 'collisionStart', function(event) {
@@ -433,6 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Check if any fruit is above the top boundary
         const bodies = Matter.Composite.allBodies(world);
+        const topBoundary = isMobile ? 80 : 100; // Adjust boundary for mobile
 
         for (let i = 0; i < bodies.length; i++) {
             const body = bodies[i];
@@ -469,15 +397,12 @@ document.addEventListener('DOMContentLoaded', function() {
         Runner.run(runner, engine);
 
         // Create the first fruit
-        currentFruit = createFruit(gameWidth/2, 50, nextFruit);
+        currentFruit = createFruit(200, 50, nextFruit);
         Body.setStatic(currentFruit, true);
         World.add(world, currentFruit);
 
         nextFruit = getRandomFruit();
         drawNextFruit();
-
-        // Add touch instructions after game starts
-        addTouchInstructions();
     }).catch(error => {
         console.error("Error loading images:", error);
     });
@@ -501,3 +426,9 @@ window.addEventListener('resize', function() {
         location.reload();
     }
 });
+
+// Update the drop line position in the DOM
+const dropLine = document.querySelector('.drop-line');
+if (dropLine) {
+    dropLine.style.top = dropLineY + 'px';
+}
