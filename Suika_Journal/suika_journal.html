@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Suika Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-container">
+        <div class="game-container">
+            <h1 class="game-title">Suika Journal</h1>
+            <div class="score-board">
+                <div class="score-container">
+                    <span>Score: </span>
+                    <span id="score">0</span>
+                </div>
+                <div class="next-fruit">
+                    <span>Next: </span>
+                    <div class="next-fruit-container">
+                        <canvas id="next-fruit-canvas" width="80" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="game-area">
+                <canvas id="game-canvas"></canvas>
+                <div class="drop-line"></div>
+            </div>
+            <div class="controls">
+                <button id="restart-button">Restart Game</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
