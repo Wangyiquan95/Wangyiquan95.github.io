@@ -256,106 +256,170 @@ document.addEventListener('DOMContentLoaded', function() {
     function handlePointerMove(event) {
         if (currentFruit && canDropFruit && !gameOver) {
             const rect = canvas.getBoundingClientRect();
-            // Get the x position from either mouse or touch event
-            let clientX;
-            if (event.type === 'touchmove') {
-                // Prevent default to stop scrolling
-                event.preventDefault();
-                clientX = event.touches[0].clientX;
-            } else {
-                clientX = event.clientX;
+            // Handle both mouse and touch events
+            const clientX = event.clientX || (event.touches && event.touches[0] ? event.touches[0].clientX : null);
+            const clientY = event.clientY || (event.touches && event.touches[0] ? event.touches[0].clientY : null);
+
+            if (clientX !== null && clientY !== null) {
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
+
+                // Only move the fruit if touch is above the red line
+                if (y < topBoundary) {
+                    // Constrain x position to keep fruit within walls
+                    const constrainedX = Math.max(
+                        currentFruit.fruitType.radius + 10,
+                        Math.min(gameWidth - currentFruit.fruitType.radius - 10, x)
+                    );
+
+                    Body.setPosition(currentFruit, { x: constrainedX, y: 50 });
+                }
             }
-
-            const x = clientX - rect.left;
-
-            // Constrain x position to keep fruit within walls
-            const constrainedX = Math.max(
-                currentFruit.fruitType.radius + 10,
-                Math.min(render.options.width - currentFruit.fruitType.radius - 10, x)
-            );
-
-            Body.setPosition(currentFruit, { x: constrainedX, y: 50 });
         }
     }
 
     // Handle mouse/touch click/tap to drop fruit
     function handlePointerDown(event) {
         if (currentFruit && canDropFruit && !gameOver) {
-            // Prevent default on touch to avoid double-tap zoom
-            if (event.type === 'touchstart') {
-                event.preventDefault();
-            }
+            const rect = canvas.getBoundingClientRect();
+            const clientY = event.clientY || (event.touches && event.touches[0] ? event.touches[0].clientY : null);
 
-            // Enable gravity for the current fruit
-            Body.setStatic(currentFruit, false);
+            if (clientY !== null) {
+                const y = clientY - rect.top;
 
-            // Play drop sound
-            dropSound.currentTime = 0;
-            dropSound.play().catch(e => console.log("Audio play error:", e));
+                // Drop the fruit only if touch is below the red line
+                if (y > topBoundary) {
+                    // Enable gravity for the current fruit
+                    Body.setStatic(currentFruit, false);
 
-            // Prevent dropping another fruit until this one settles
-            canDropFruit = false;
+                    // Play drop sound
+                    dropSound.currentTime = 0;
+                    dropSound.play().catch(e => console.log("Audio play error:", e));
 
-            // Set a timeout to create a new fruit
-            setTimeout(function() {
-                if (!gameOver) {
-                    currentFruit = createFruit(200, 50, nextFruit);
-                    Body.setStatic(currentFruit, true);
-                    World.add(world, currentFruit);
+                    // Prevent dropping another fruit until this one settles
+                    canDropFruit = false;
 
-                    nextFruit = getRandomFruit();
-                    drawNextFruit();
+                    // Set a timeout to create a new fruit
+                    setTimeout(function() {
+                        if (!gameOver) {
+                            currentFruit = createFruit(gameWidth/2, 50, nextFruit);
+                            Body.setStatic(currentFruit, true);
+                            World.add(world, currentFruit);
 
-                    canDropFruit = true;
+                            nextFruit = getRandomFruit();
+                            drawNextFruit();
+
+                            canDropFruit = true;
+                        }
+                    }, 500);
                 }
-            }, 500);
+            }
         }
     }
 
-    // Remove any existing event listeners first (if you're reapplying this fix)
-    canvas.removeEventListener('mousemove', handlePointerMove);
-    canvas.removeEventListener('touchmove', handlePointerMove);
-    canvas.removeEventListener('click', handlePointerDown);
-    canvas.removeEventListener('touchstart', handlePointerDown);
+    // Define the top boundary (red line position) once for consistent use
+    const topBoundary = isMobile ? 80 : 100;
+
+    // Update the drop line to be more visible on mobile
+    const dropLine = document.querySelector('.drop-line');
+    dropLine.style.top = topBoundary + 'px';
+    dropLine.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
+    dropLine.style.height = '3px';
 
     // Add event listeners for both mouse and touch
-    canvas.addEventListener('mousemove', handlePointerMove, { passive: false });
-    canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
-    canvas.addEventListener('click', handlePointerDown, { passive: true });
-    canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
+    canvas.addEventListener('mousemove', handlePointerMove);
+    canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault(); // Prevent scrolling when touching the canvas
+        handlePointerMove(e);
+    });
+
+    canvas.addEventListener('click', handlePointerDown);
+    canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault(); // Prevent double tap to zoom
+        handlePointerMove(e); // Update position immediately on touch
+    });
+
+    canvas.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        handlePointerDown(e);
+    });
+
+    // Add visual cues to help users understand the controls
+    function addTouchInstructions() {
+        if (isMobile) {
+            const instructionTop = document.createElement('div');
+            instructionTop.className = 'touch-instruction';
+            instructionTop.textContent = 'Touch here to position';
+            instructionTop.style.position = 'absolute';
+            instructionTop.style.top = '30px';
+            instructionTop.style.left = '50%';
+            instructionTop.style.transform = 'translateX(-50%)';
+            instructionTop.style.color = 'rgba(0, 0, 0, 0.5)';
+            instructionTop.style.fontSize = '14px';
+            instructionTop.style.pointerEvents = 'none';
+
+            const instructionBottom = document.createElement('div');
+            instructionBottom.className = 'touch-instruction';
+            instructionBottom.textContent = 'Touch here to drop';
+            instructionBottom.style.position = 'absolute';
+            instructionBottom.style.top = (topBoundary + 20) + 'px';
+            instructionBottom.style.left = '50%';
+            instructionBottom.style.transform = 'translateX(-50%)';
+            instructionBottom.style.color = 'rgba(0, 0, 0, 0.5)';
+            instructionBottom.style.fontSize = '14px';
+            instructionBottom.style.pointerEvents = 'none';
+
+            gameContainer.appendChild(instructionTop);
+            gameContainer.appendChild(instructionBottom);
+
+            // Fade out instructions after 5 seconds
+            setTimeout(() => {
+                instructionTop.style.transition = 'opacity 1s';
+                instructionBottom.style.transition = 'opacity 1s';
+                instructionTop.style.opacity = '0';
+                instructionBottom.style.opacity = '0';
+
+                // Remove from DOM after fade out
+                setTimeout(() => {
+                    gameContainer.removeChild(instructionTop);
+                    gameContainer.removeChild(instructionBottom);
+                }, 1000);
+            }, 5000);
+        }
+    }
 
     // Check for collisions between fruits
     Events.on(engine, 'collisionStart', function(event) {
         const pairs = event.pairs;
-        
+
         for (let i = 0; i < pairs.length; i++) {
             const bodyA = pairs[i].bodyA;
             const bodyB = pairs[i].bodyB;
-            
+
             // Check if both bodies are fruits and of the same type
-            if (bodyA.fruitType && bodyB.fruitType && 
+            if (bodyA.fruitType && bodyB.fruitType &&
                 bodyA.fruitType.name === bodyB.fruitType.name &&
                 bodyA.fruitType.nextSize) {
-                
+
                 // Calculate the midpoint between the two fruits
                 const midX = (bodyA.position.x + bodyB.position.x) / 2;
                 const midY = (bodyA.position.y + bodyB.position.y) / 2;
-                
+
                 // Find the next fruit type
                 const nextFruitType = fruitTypes.find(f => f.name === bodyA.fruitType.nextSize);
-                
+
                 if (nextFruitType) {
                     // Remove the two colliding fruits
                     World.remove(world, [bodyA, bodyB]);
-                    
+
                     // Create a new, larger fruit
                     const newFruit = createFruit(midX, midY, nextFruitType);
                     World.add(world, newFruit);
-                    
+
                     // Play merge sound
                     mergeSound.currentTime = 0;
                     mergeSound.play().catch(e => console.log("Audio play error:", e));
-                    
+
                     // Update score
                     updateScore(nextFruitType.points);
                 }
@@ -366,14 +430,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check for game over condition
     Events.on(engine, 'afterUpdate', function() {
         if (gameOver) return;
-        
+
         // Check if any fruit is above the top boundary
         const bodies = Matter.Composite.allBodies(world);
-        const topBoundary = isMobile ? 80 : 100; // Adjust boundary for mobile
-        
+
         for (let i = 0; i < bodies.length; i++) {
             const body = bodies[i];
-            
+
             if (body.fruitType && !body.isStatic && body.position.y < topBoundary) {
                 // Check if the body has been static for a while
                 if (!body.timeAboveBoundary) {
@@ -381,11 +444,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (Date.now() - body.timeAboveBoundary > 3000) {
                     // Game over if a fruit has been above the boundary for 3 seconds
                     gameOver = true;
-                    
+
                     // Play game over sound
                     gameOverSound.currentTime = 0;
                     gameOverSound.play().catch(e => console.log("Audio play error:", e));
-                    
+
                     alert('Game Over! Your score: ' + score);
                     break;
                 }
@@ -398,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Improve renderer settings for better resolution
     Render.setPixelRatio(render, window.devicePixelRatio || 1);
-    
+
     // Start the game after images are loaded
     preloadImages().then(() => {
         Render.run(render);
@@ -406,12 +469,15 @@ document.addEventListener('DOMContentLoaded', function() {
         Runner.run(runner, engine);
 
         // Create the first fruit
-        currentFruit = createFruit(200, 50, nextFruit);
+        currentFruit = createFruit(gameWidth/2, 50, nextFruit);
         Body.setStatic(currentFruit, true);
         World.add(world, currentFruit);
-        
+
         nextFruit = getRandomFruit();
         drawNextFruit();
+
+        // Add touch instructions after game starts
+        addTouchInstructions();
     }).catch(error => {
         console.error("Error loading images:", error);
     });
