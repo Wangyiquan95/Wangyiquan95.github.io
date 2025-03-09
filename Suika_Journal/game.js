@@ -256,64 +256,73 @@ document.addEventListener('DOMContentLoaded', function() {
     function handlePointerMove(event) {
         if (currentFruit && canDropFruit && !gameOver) {
             const rect = canvas.getBoundingClientRect();
-            // Handle both mouse and touch events
-            const clientX = event.clientX || (event.touches && event.touches[0] ? event.touches[0].clientX : null);
-            
-            if (clientX !== null) {
-                const x = clientX - rect.left;
-                
-                // Constrain x position to keep fruit within walls
-                const constrainedX = Math.max(
-                    currentFruit.fruitType.radius + 10,
-                    Math.min(gameWidth - currentFruit.fruitType.radius - 10, x)
-                );
-                
-                Body.setPosition(currentFruit, { x: constrainedX, y: 50 });
+            // Get the x position from either mouse or touch event
+            let clientX;
+            if (event.type === 'touchmove') {
+                // Prevent default to stop scrolling
+                event.preventDefault();
+                clientX = event.touches[0].clientX;
+            } else {
+                clientX = event.clientX;
             }
+
+            const x = clientX - rect.left;
+
+            // Constrain x position to keep fruit within walls
+            const constrainedX = Math.max(
+                currentFruit.fruitType.radius + 10,
+                Math.min(render.options.width - currentFruit.fruitType.radius - 10, x)
+            );
+
+            Body.setPosition(currentFruit, { x: constrainedX, y: 50 });
         }
     }
 
     // Handle mouse/touch click/tap to drop fruit
-    function handlePointerDown() {
+    function handlePointerDown(event) {
         if (currentFruit && canDropFruit && !gameOver) {
+            // Prevent default on touch to avoid double-tap zoom
+            if (event.type === 'touchstart') {
+                event.preventDefault();
+            }
+
             // Enable gravity for the current fruit
             Body.setStatic(currentFruit, false);
-            
+
             // Play drop sound
             dropSound.currentTime = 0;
             dropSound.play().catch(e => console.log("Audio play error:", e));
-            
+
             // Prevent dropping another fruit until this one settles
             canDropFruit = false;
-            
+
             // Set a timeout to create a new fruit
             setTimeout(function() {
                 if (!gameOver) {
-                    currentFruit = createFruit(gameWidth/2, 50, nextFruit);
+                    currentFruit = createFruit(200, 50, nextFruit);
                     Body.setStatic(currentFruit, true);
                     World.add(world, currentFruit);
-                    
+
                     nextFruit = getRandomFruit();
                     drawNextFruit();
-                    
+
                     canDropFruit = true;
                 }
             }, 500);
         }
     }
 
+    // Remove any existing event listeners first (if you're reapplying this fix)
+    canvas.removeEventListener('mousemove', handlePointerMove);
+    canvas.removeEventListener('touchmove', handlePointerMove);
+    canvas.removeEventListener('click', handlePointerDown);
+    canvas.removeEventListener('touchstart', handlePointerDown);
+
     // Add event listeners for both mouse and touch
-    canvas.addEventListener('mousemove', handlePointerMove);
-    canvas.addEventListener('touchmove', function(e) {
-        e.preventDefault(); // Prevent scrolling when touching the canvas
-        handlePointerMove(e);
-    });
-    
-    canvas.addEventListener('click', handlePointerDown);
-    canvas.addEventListener('touchstart', function(e) {
-        e.preventDefault(); // Prevent double tap to zoom
-        handlePointerDown(e);
-    });
+    canvas.addEventListener('mousemove', handlePointerMove, { passive: false });
+    canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
+    canvas.addEventListener('click', handlePointerDown, { passive: true });
+    canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
 
     // Check for collisions between fruits
     Events.on(engine, 'collisionStart', function(event) {
