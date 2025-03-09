@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const x = clientX - rect.left;
 
                 // Constrain x position to keep fruit within walls
-                const constrainedX = Math.max(
+                constrainedX = Math.max(
                     currentFruit.fruitType.radius + 10,
                     Math.min(gameWidth - currentFruit.fruitType.radius - 10, x)
                 );
@@ -291,7 +291,26 @@ document.addEventListener('DOMContentLoaded', function() {
             const x = clientX - rect.left;
 
             // Constrain x position
-            const constrainedX = Math.max(
+            constrainedX = Math.max(
+                currentFruit.fruitType.radius + 10,
+                Math.min(gameWidth - currentFruit.fruitType.radius - 10, x)
+            );
+
+            Body.setPosition(currentFruit, { x: constrainedX, y: 50 });
+        }
+    }
+
+    // Handle touch move with improved responsiveness
+    function handleTouchMove(event) {
+        event.preventDefault(); // Prevent scrolling
+
+        if (currentFruit && canDropFruit && !gameOver) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = event.touches[0].clientX;
+            const x = clientX - rect.left;
+
+            // Constrain x position with smoother movement
+            constrainedX = Math.max(
                 currentFruit.fruitType.radius + 10,
                 Math.min(gameWidth - currentFruit.fruitType.radius - 10, x)
             );
@@ -342,9 +361,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add appropriate event listeners based on device type
     if (isTouchDevice) {
         // Touch device - use touch events
-        canvas.addEventListener('touchmove', handlePointerMove);
-        canvas.addEventListener('touchstart', handleTouchStart);
-        canvas.addEventListener('touchend', handleTouchEnd);
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+        canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        // Add visual indicator for mobile users
+        const dropIndicator = document.createElement('div');
+        dropIndicator.className = 'mobile-indicator';
+        dropIndicator.textContent = 'Touch & drag to position, release to drop';
+        dropIndicator.style.position = 'absolute';
+        dropIndicator.style.bottom = '10px';
+        dropIndicator.style.left = '0';
+        dropIndicator.style.right = '0';
+        dropIndicator.style.textAlign = 'center';
+        dropIndicator.style.color = 'rgba(0,0,0,0.5)';
+        dropIndicator.style.fontSize = '12px';
+        dropIndicator.style.padding = '5px';
+        dropIndicator.style.pointerEvents = 'none';
+        gameContainer.appendChild(dropIndicator);
+
+        // Hide indicator after 5 seconds
+        setTimeout(() => {
+            dropIndicator.style.opacity = '0';
+            dropIndicator.style.transition = 'opacity 1s';
+        }, 5000);
     } else {
         // Desktop device - use mouse events
         canvas.addEventListener('mousemove', handlePointerMove);
