@@ -5,7 +5,7 @@
   bottom: 20px;
   left: 0;
   width: 100%;
-  z-index: 1000; /* Ensure controls are above the game canvas */
+  z-index: 100;
   pointer-events: none; /* Allow clicks to pass through by default */
 }
 
@@ -16,17 +16,16 @@
   pointer-events: auto;
 }
 
-.d-pad {
-  display: flex;
-  margin-left: 20px;
+/* Prevent game canvas from receiving touch events on mobile */
+.touch-device .game-screen {
+  touch-action: none;
+  pointer-events: none;
 }
 
-.action-buttons {
-  display: flex;
-  margin-right: 20px;
-}
-
+/* Only buttons should receive touch events */
 .control-btn {
+  pointer-events: auto;
+  touch-action: manipulation;
   width: 70px;
   height: 70px;
   margin: 0 10px;
@@ -41,8 +40,16 @@
   justify-content: center;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  cursor: pointer;
-  touch-action: manipulation; /* Prevent browser handling of touch gestures */
+}
+
+.d-pad {
+  display: flex;
+  margin-left: 20px;
+}
+
+.action-buttons {
+  display: flex;
+  margin-right: 20px;
 }
 
 #btn-left, #btn-right {
@@ -67,16 +74,4 @@
 /* Make buttons semi-transparent when pressed */
 .control-btn:active {
   opacity: 0.7;
-  transform: scale(0.95);
-}
-
-/* Media query to ensure controls are visible on mobile devices */
-@media (max-width: 1024px) {
-  .mobile-controls {
-    display: flex;
-  }
-  
-  .touch-device .mobile-controls {
-    display: flex !important;
-  }
 }

@@ -2,15 +2,12 @@
 (function() {
   // Detect touch device
   function isTouchDevice() {
-    return 'ontouchstart' in window || navigator.maxTouchPoints > 0 || navigator.msMaxTouchPoints > 0;
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   }
   
   // Add class to body if touch device
-  function initTouchDetection() {
-    if (isTouchDevice()) {
-      document.body.classList.add('touch-device');
-      console.log('Touch device detected, enabling mobile controls');
-    }
+  if (isTouchDevice()) {
+    document.body.classList.add('touch-device');
   }
   
   // Key codes used in the game
@@ -24,36 +21,16 @@
   
   // Function to simulate keydown/keyup events
   function simulateKeyEvent(keyCode, isKeyDown) {
-    const eventType = isKeyDown ? 'keydown' : 'keyup';
-    
-    // Create event with deprecated keyCode for compatibility
-    const event = new KeyboardEvent(eventType, {
-      bubbles: true,
-      cancelable: true,
+    const event = new KeyboardEvent(isKeyDown ? 'keydown' : 'keyup', {
       keyCode: keyCode,
       which: keyCode,
-      code: getKeyCodeString(keyCode)
+      bubbles: true
     });
-    
-    // Dispatch the event
-    document.dispatchEvent(event);
-    console.log(`Simulated ${eventType} for key code ${keyCode}`);
-  }
-  
-  // Helper to convert keyCode to code string
-  function getKeyCodeString(keyCode) {
-    switch(keyCode) {
-      case KEYS.LEFT: return 'ArrowLeft';
-      case KEYS.RIGHT: return 'ArrowRight';
-      case KEYS.JUMP: return 'Space';
-      case KEYS.RUN: return 'ShiftLeft';
-      case KEYS.FIRE: return 'ControlLeft';
-      default: return '';
-    }
+    document.body.dispatchEvent(event);
   }
   
   // Setup button event listeners
-  function setupMobileControls() {
+  document.addEventListener('DOMContentLoaded', function() {
     if (!isTouchDevice()) return;
     
     const buttons = {
@@ -67,10 +44,7 @@
     // Add event listeners for all buttons
     Object.keys(buttons).forEach(btnId => {
       const btn = document.getElementById(btnId);
-      if (!btn) {
-        console.error(`Button with id ${btnId} not found`);
-        return;
-      }
+      if (!btn) return;
       
       // Touch start - simulate keydown
       btn.addEventListener('touchstart', function(e) {
@@ -88,22 +62,6 @@
       ['touchmove', 'touchcancel'].forEach(eventType => {
         btn.addEventListener(eventType, e => e.preventDefault());
       });
-      
-      console.log(`Mobile control button ${btnId} initialized`);
     });
-  }
-  
-  // Initialize when DOM is fully loaded
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing mobile controls');
-    initTouchDetection();
-    setupMobileControls();
   });
-  
-  // Also try initializing immediately if DOM is already loaded
-  if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    console.log('DOM already loaded, initializing mobile controls immediately');
-    initTouchDetection();
-    setupMobileControls();
-  }
 })();
