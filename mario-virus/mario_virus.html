@@ -6,6 +6,18 @@
   <title>Mario Maker</title>
   <link rel="stylesheet" type="text/css" href="css/style.css">
   <link rel="stylesheet" type="text/css" href="css/reset.css">
+  <style>
+    /* Prevent text selection and other touch behaviors */
+    body, canvas, .main-wrapper {
+      -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none;   /* Safari */
+      -khtml-user-select: none;    /* Konqueror HTML */
+      -moz-user-select: none;      /* Firefox */
+      -ms-user-select: none;       /* Internet Explorer/Edge */
+      user-select: none;           /* Non-prefixed version */
+      -webkit-tap-highlight-color: rgba(0,0,0,0); /* Remove tap highlight */
+    }
+  </style>
 </head>
 
 <body>
@@ -35,6 +47,21 @@
 
   <script src="js/Preloader.js"></script>
 
+  <script>
+    // Prevent context menu and selection behaviors
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    });
+    
+    // Prevent touch selection behavior
+    document.addEventListener('touchstart', function(e) {
+      // Only prevent default if it's on the game canvas or wrapper
+      if (e.target.classList.contains('game-screen') || 
+          e.target.classList.contains('main-wrapper')) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  </script>
 </body>
 
 </html>
