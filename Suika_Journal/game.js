@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const globalTopScores = [
         { name: "Jennif", score: 1999 },
         { name: "Lucia", score: 1944 },
-        { name: "Tong", score: 1901 }
+        { name: "Rainyday", score: 1930 }
     ];
     
     // Update high score display if it exists
