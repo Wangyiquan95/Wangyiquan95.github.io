@@ -119,6 +119,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let gameOver = false;
     let highScore = localStorage.getItem('suikaHighScore') || 0; // Load high score from localStorage
     
+    // Global top scores (you can define these)
+    const globalTopScores = [
+        { name: "Jennif", score: 1999 },
+        { name: "Lucia", score: 1944 },
+        { name: "Tong", score: 1901 }
+    ];
+    
     // Update high score display if it exists
     if (document.getElementById('high-score')) {
         document.getElementById('high-score').textContent = highScore;
@@ -534,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add high score message
         const highScoreText = document.createElement('p');
-        highScoreText.textContent = `High score: ${highScore}`;
+        highScoreText.textContent = `Your high score: ${highScore}`;
         content.appendChild(highScoreText);
         
         // Add congratulations for new high score
@@ -545,6 +552,88 @@ document.addEventListener('DOMContentLoaded', function() {
             congrats.style.fontWeight = 'bold';
             congrats.style.fontSize = '1.2em';
             content.appendChild(congrats);
+        }
+        
+        // Add global rankings section
+        const rankingsTitle = document.createElement('h3');
+        rankingsTitle.textContent = 'Global Top 3';
+        rankingsTitle.style.marginTop = '20px';
+        rankingsTitle.style.marginBottom = '10px';
+        content.appendChild(rankingsTitle);
+        
+        // Create rankings table
+        const rankingsTable = document.createElement('table');
+        rankingsTable.style.width = '100%';
+        rankingsTable.style.marginBottom = '20px';
+        rankingsTable.style.borderCollapse = 'collapse';
+        
+        // Add table header
+        const tableHeader = document.createElement('tr');
+        
+        const rankHeader = document.createElement('th');
+        rankHeader.textContent = 'Rank';
+        rankHeader.style.padding = '5px';
+        rankHeader.style.borderBottom = '1px solid #ddd';
+        tableHeader.appendChild(rankHeader);
+        
+        const nameHeader = document.createElement('th');
+        nameHeader.textContent = 'Name';
+        nameHeader.style.padding = '5px';
+        nameHeader.style.borderBottom = '1px solid #ddd';
+        tableHeader.appendChild(nameHeader);
+        
+        const scoreHeader = document.createElement('th');
+        scoreHeader.textContent = 'Score';
+        scoreHeader.style.padding = '5px';
+        scoreHeader.style.borderBottom = '1px solid #ddd';
+        tableHeader.appendChild(scoreHeader);
+        
+        rankingsTable.appendChild(tableHeader);
+        
+        // Add top 3 scores
+        globalTopScores.forEach((topScore, index) => {
+            const row = document.createElement('tr');
+            
+            // Highlight row if player's score is higher
+            if (finalScore > topScore.score) {
+                row.style.opacity = '0.5';
+            }
+            
+            const rankCell = document.createElement('td');
+            rankCell.textContent = `#${index + 1}`;
+            rankCell.style.padding = '5px';
+            row.appendChild(rankCell);
+            
+            const nameCell = document.createElement('td');
+            nameCell.textContent = topScore.name;
+            nameCell.style.padding = '5px';
+            row.appendChild(nameCell);
+            
+            const scoreCell = document.createElement('td');
+            scoreCell.textContent = topScore.score;
+            scoreCell.style.padding = '5px';
+            row.appendChild(scoreCell);
+            
+            rankingsTable.appendChild(row);
+        });
+        
+        content.appendChild(rankingsTable);
+        
+        // Add player's rank message if they beat any global scores
+        let playerRank = globalTopScores.length + 1;
+        for (let i = 0; i < globalTopScores.length; i++) {
+            if (finalScore > globalTopScores[i].score) {
+                playerRank = i + 1;
+                break;
+            }
+        }
+        
+        if (playerRank <= globalTopScores.length) {
+            const playerRankMsg = document.createElement('p');
+            playerRankMsg.textContent = `Your score would rank #${playerRank} globally!`;
+            playerRankMsg.style.fontWeight = 'bold';
+            playerRankMsg.style.color = '#4CAF50';
+            content.appendChild(playerRankMsg);
         }
         
         // Add share button
