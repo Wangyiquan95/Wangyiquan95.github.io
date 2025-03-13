@@ -18,55 +18,56 @@
       -webkit-tap-highlight-color: rgba(0,0,0,0); /* Remove tap highlight */
     }
     
-    /* Mobile touch controls */
-    .touch-controls {
+    /* Mobile controls styling */
+    .mobile-controls {
       position: absolute;
       bottom: 20px;
       width: 100%;
-      height: 100px;
-      pointer-events: none;
+      display: none; /* Hidden by default, shown on mobile */
       z-index: 100;
+      pointer-events: none; /* Let events pass through to the game */
     }
     
-    .touch-button {
+    .control-button {
       position: absolute;
-      height: 100px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 15px;
-      background-color: rgba(255, 255, 255, 0.1);
-      pointer-events: auto;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      pointer-events: auto; /* Make buttons clickable */
       display: flex;
       align-items: center;
       justify-content: center;
-      color: rgba(255, 255, 255, 0.6);
-      font-family: Arial, sans-serif;
-      font-weight: bold;
+      font-size: 24px;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
     }
     
-    .btn-left {
-      left: 20px;
-      width: 160px;
+    #left-btn {
+      left: 30px;
+      bottom: 100px;
     }
     
-    .btn-right {
-      left: 200px;
-      width: 160px;
+    #right-btn {
+      left: 130px;
+      bottom: 100px;
     }
     
-    .btn-action {
-      right: 200px;
-      width: 200px;
+    #jump-btn {
+      right: 30px;
+      bottom: 100px;
     }
     
-    .btn-jump {
-      right: 20px;
-      width: 160px;
+    #action-btn {
+      right: 130px;
+      bottom: 100px;
     }
     
-    /* Hide on desktop */
-    @media (min-width: 1024px) {
-      .touch-controls {
-        display: none;
+    /* Show controls only on mobile devices */
+    @media (max-width: 1024px) {
+      .mobile-controls {
+        display: block;
       }
     }
   </style>
@@ -78,12 +79,12 @@
   <div class="main-wrapper">
     <canvas class="game-screen"></canvas>
     
-    <!-- Mobile touch controls -->
-    <div class="touch-controls">
-      <div class="touch-button btn-left">←</div>
-      <div class="touch-button btn-right">→</div>
-      <div class="touch-button btn-action">RUN/FIRE</div>
-      <div class="touch-button btn-jump">JUMP</div>
+    <!-- Mobile control buttons -->
+    <div class="mobile-controls">
+      <div id="left-btn" class="control-button">←</div>
+      <div id="right-btn" class="control-button">→</div>
+      <div id="jump-btn" class="control-button">A</div>
+      <div id="action-btn" class="control-button">B</div>
     </div>
   </div>
 
@@ -117,25 +118,25 @@
     document.addEventListener('touchstart', function(e) {
       // Only prevent default if it's on the game canvas or wrapper
       if (e.target.classList.contains('game-screen') || 
-          e.target.classList.contains('main-wrapper')) {
+          e.target.classList.contains('main-wrapper') ||
+          e.target.classList.contains('control-button')) {
         e.preventDefault();
       }
     }, { passive: false });
     
-    // Setup visual touch buttons
+    // Mobile control buttons functionality
     document.addEventListener('DOMContentLoaded', function() {
       // Key codes
-      const LEFT_KEY = 37;
-      const RIGHT_KEY = 39;
-      const SHIFT_KEY = 16;
-      const CTRL_KEY = 17;
-      const JUMP_KEY = 32;
+      const LEFT = 37;
+      const RIGHT = 39;
+      const JUMP = 32; // Space
+      const ACTION = 16; // Shift for run, 17 for fire (Ctrl)
       
       // Get buttons
-      const btnLeft = document.querySelector('.btn-left');
-      const btnRight = document.querySelector('.btn-right');
-      const btnAction = document.querySelector('.btn-action');
-      const btnJump = document.querySelector('.btn-jump');
+      const leftBtn = document.getElementById('left-btn');
+      const rightBtn = document.getElementById('right-btn');
+      const jumpBtn = document.getElementById('jump-btn');
+      const actionBtn = document.getElementById('action-btn');
       
       // Simulate key press/release
       function simulateKey(keyCode, isPressed) {
@@ -147,45 +148,56 @@
         document.dispatchEvent(event);
       }
       
-      // Left button
-      btnLeft.addEventListener('touchstart', function(e) {
-        simulateKey(LEFT_KEY, true);
-        e.preventDefault();
-      });
-      btnLeft.addEventListener('touchend', function(e) {
-        simulateKey(LEFT_KEY, false);
+      // Touch events for left button
+      leftBtn.addEventListener('touchstart', function(e) {
+        simulateKey(LEFT, true);
         e.preventDefault();
       });
       
-      // Right button
-      btnRight.addEventListener('touchstart', function(e) {
-        simulateKey(RIGHT_KEY, true);
-        e.preventDefault();
-      });
-      btnRight.addEventListener('touchend', function(e) {
-        simulateKey(RIGHT_KEY, false);
+      leftBtn.addEventListener('touchend', function(e) {
+        simulateKey(LEFT, false);
         e.preventDefault();
       });
       
-      // Action button (sprint and fire)
-      btnAction.addEventListener('touchstart', function(e) {
-        simulateKey(SHIFT_KEY, true);
-        simulateKey(CTRL_KEY, true);
-        e.preventDefault();
-      });
-      btnAction.addEventListener('touchend', function(e) {
-        simulateKey(SHIFT_KEY, false);
-        simulateKey(CTRL_KEY, false);
+      // Touch events for right button
+      rightBtn.addEventListener('touchstart', function(e) {
+        simulateKey(RIGHT, true);
         e.preventDefault();
       });
       
-      // Jump button
-      btnJump.addEventListener('touchstart', function(e) {
-        simulateKey(JUMP_KEY, true);
+      rightBtn.addEventListener('touchend', function(e) {
+        simulateKey(RIGHT, false);
         e.preventDefault();
       });
-      btnJump.addEventListener('touchend', function(e) {
-        simulateKey(JUMP_KEY, false);
+      
+      // Touch events for jump button
+      jumpBtn.addEventListener('touchstart', function(e) {
+        simulateKey(JUMP, true);
+        e.preventDefault();
+      });
+      
+      jumpBtn.addEventListener('touchend', function(e) {
+        simulateKey(JUMP, false);
+        e.preventDefault();
+      });
+      
+      // Touch events for action button (toggles between run and fire)
+      let isRunning = true;
+      
+      actionBtn.addEventListener('touchstart', function(e) {
+        simulateKey(isRunning ? 16 : 17, true); // 16 for Shift (run), 17 for Ctrl (fire)
+        e.preventDefault();
+      });
+      
+      actionBtn.addEventListener('touchend', function(e) {
+        simulateKey(isRunning ? 16 : 17, false);
+        e.preventDefault();
+      });
+      
+      // Double tap on action button to toggle between run and fire
+      actionBtn.addEventListener('dblclick', function(e) {
+        isRunning = !isRunning;
+        actionBtn.textContent = isRunning ? 'B' : 'F';
         e.preventDefault();
       });
     });
