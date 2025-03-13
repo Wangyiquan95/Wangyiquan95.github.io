@@ -80,7 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'peach', radius: 75, color: '#FFCC99', points: 28, nextSize: 'pineapple', imagePath: 'images/nature.png' },
         { name: 'pineapple', radius: 85, color: '#FFFF00', points: 36, nextSize: 'melon', imagePath: 'images/cell.png' },
         { name: 'melon', radius: 95, color: '#00FF00', points: 45, nextSize: 'watermelon', imagePath: 'images/nobel_prize.png' },
-        { name: 'watermelon', radius: 105, color: '#00AA00', points: 55, nextSize: null, imagePath: 'images/money.png' }
+        { name: 'watermelon', radius: 105, color: '#00AA00', points: 55, nextSize: 'superstar', imagePath: 'images/money.png' },
+        { name: 'superstar', radius: 25, color: '#FFD700', points: 100, nextSize: null, imagePath: 'images/superstar.png' }
     ];
     
     // Preload all fruit images
@@ -116,6 +117,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let nextFruit = getRandomFruit();
     let canDropFruit = true;
     let gameOver = false;
+    let highScore = localStorage.getItem('suikaHighScore') || 0; // Load high score from localStorage
+    
+    // Update high score display if it exists
+    if (document.getElementById('high-score')) {
+        document.getElementById('high-score').textContent = highScore;
+    }
 
     // Get random fruit (only from the first 5 types)
     function getRandomFruit() {
@@ -401,10 +408,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check for collisions between fruits
     Events.on(engine, 'collisionStart', function(event) {
         const pairs = event.pairs;
+        // Track which bodies have been processed in this collision cycle
+        const processedBodies = new Set();
 
         for (let i = 0; i < pairs.length; i++) {
             const bodyA = pairs[i].bodyA;
             const bodyB = pairs[i].bodyB;
+
+            // Skip if either body has already been processed in this cycle
+            if (processedBodies.has(bodyA.id) || processedBodies.has(bodyB.id)) {
+                continue;
+            }
 
             // Check if both bodies are fruits and of the same type
             if (bodyA.fruitType && bodyB.fruitType &&
@@ -419,6 +433,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const nextFruitType = fruitTypes.find(f => f.name === bodyA.fruitType.nextSize);
 
                 if (nextFruitType) {
+                    // Mark these bodies as processed
+                    processedBodies.add(bodyA.id);
+                    processedBodies.add(bodyB.id);
+                    
                     // Remove the two colliding fruits
                     World.remove(world, [bodyA, bodyB]);
 
@@ -460,7 +478,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     gameOverSound.currentTime = 0;
                     gameOverSound.play().catch(e => console.log("Audio play error:", e));
 
-                    alert('Game Over! Your score: ' + score);
+                    // Check for high score
+                    let isNewHighScore = false;
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('suikaHighScore', highScore);
+                        isNewHighScore = true;
+                    }
+                    
+                    // Show game over dialog with share option
+                    showGameOverDialog(score, isNewHighScore);
                     break;
                 }
             } else if (body.timeAboveBoundary) {
@@ -469,6 +496,138 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+    
+    // Function to show game over dialog with share option
+    function showGameOverDialog(finalScore, isNewHighScore) {
+        // Create modal container
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        modal.style.display = 'flex';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        modal.style.zIndex = '1000';
+        
+        // Create modal content
+        const content = document.createElement('div');
+        content.style.backgroundColor = 'white';
+        content.style.padding = '20px';
+        content.style.borderRadius = '10px';
+        content.style.maxWidth = '80%';
+        content.style.textAlign = 'center';
+        
+        // Add title
+        const title = document.createElement('h2');
+        title.textContent = 'Game Over!';
+        title.style.marginTop = '0';
+        content.appendChild(title);
+        
+        // Add score
+        const scoreText = document.createElement('p');
+        scoreText.textContent = `Your score: ${finalScore}`;
+        scoreText.style.fontSize = '1.2em';
+        content.appendChild(scoreText);
+        
+        // Add high score message
+        const highScoreText = document.createElement('p');
+        highScoreText.textContent = `High score: ${highScore}`;
+        content.appendChild(highScoreText);
+        
+        // Add congratulations for new high score
+        if (isNewHighScore) {
+            const congrats = document.createElement('p');
+            congrats.textContent = '🎉 Congratulations! New high score! 🎉';
+            congrats.style.color = '#FF9900';
+            congrats.style.fontWeight = 'bold';
+            congrats.style.fontSize = '1.2em';
+            content.appendChild(congrats);
+        }
+        
+        // Add share button
+        const shareButton = document.createElement('button');
+        shareButton.textContent = 'Share Score';
+        shareButton.style.padding = '10px 15px';
+        shareButton.style.margin = '10px';
+        shareButton.style.backgroundColor = '#4267B2';
+        shareButton.style.color = 'white';
+        shareButton.style.border = 'none';
+        shareButton.style.borderRadius = '5px';
+        shareButton.style.cursor = 'pointer';
+        
+        shareButton.addEventListener('click', function() {
+            const shareText = `I scored ${finalScore} points in Suika Journal! Can you beat my score?`;
+            const shareUrl = window.location.href;
+            
+            // Check if Web Share API is available
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Suika Journal Score',
+                    text: shareText,
+                    url: shareUrl
+                })
+                .then(() => console.log('Successfully shared'))
+                .catch(error => {
+                    console.log('Error sharing:', error);
+                    // Fallback if sharing fails
+                    copyToClipboard(shareText + ' ' + shareUrl);
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                copyToClipboard(shareText + ' ' + shareUrl);
+            }
+        });
+        content.appendChild(shareButton);
+        
+        // Helper function to copy text to clipboard
+        function copyToClipboard(text) {
+            // Create temporary element
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            let successful = false;
+            try {
+                successful = document.execCommand('copy');
+                const msg = successful ? 'Score copied to clipboard! Share it with your friends.' : 'Unable to copy';
+                alert(msg);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                alert('Failed to copy. Please manually copy your score: ' + text);
+            }
+            
+            document.body.removeChild(textArea);
+            return successful;
+        }
+        
+        // Add play again button
+        const playAgainButton = document.createElement('button');
+        playAgainButton.textContent = 'Play Again';
+        playAgainButton.style.padding = '10px 15px';
+        playAgainButton.style.margin = '10px';
+        playAgainButton.style.backgroundColor = '#4CAF50';
+        playAgainButton.style.color = 'white';
+        playAgainButton.style.border = 'none';
+        playAgainButton.style.borderRadius = '5px';
+        playAgainButton.style.cursor = 'pointer';
+        
+        playAgainButton.addEventListener('click', function() {
+            location.reload();
+        });
+        content.appendChild(playAgainButton);
+        
+        // Add modal to page
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+    }
 
     // Improve renderer settings for better resolution
     Render.setPixelRatio(render, window.devicePixelRatio || 1);
