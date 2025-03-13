@@ -6,7 +6,6 @@
   <title>Mario Maker</title>
   <link rel="stylesheet" type="text/css" href="css/style.css">
   <link rel="stylesheet" type="text/css" href="css/reset.css">
-  <link rel="stylesheet" type="text/css" href="css/mobile-controls.css">
 </head>
 
 <body>
@@ -14,19 +13,6 @@
   <!-- main game -->
   <div class="main-wrapper">
     <canvas class="game-screen"></canvas>
-    
-    <!-- Mobile controls - only visible on touch devices -->
-    <div class="mobile-controls">
-      <div class="d-pad">
-        <button id="btn-left" class="control-btn">←</button>
-        <button id="btn-right" class="control-btn">→</button>
-      </div>
-      <div class="action-buttons">
-        <button id="btn-jump" class="control-btn">Jump</button>
-        <button id="btn-run" class="control-btn">Run</button>
-        <button id="btn-fire" class="control-btn">Fire</button>
-      </div>
-    </div>
   </div>
 
   <script src="js/View.js"></script>
@@ -45,7 +31,6 @@
   <script src="js/levelEditor/Editor.js"></script>
   <script src="js/levelEditor/CreatedLevels.js"></script>
 
-  <script src="js/MobileControls.js"></script>
   <script src="js/MarioMaker.js"></script>
 
   <script src="js/Preloader.js"></script>
