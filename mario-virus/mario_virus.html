@@ -17,6 +17,47 @@
       user-select: none;           /* Non-prefixed version */
       -webkit-tap-highlight-color: rgba(0,0,0,0); /* Remove tap highlight */
     }
+    
+    /* Mobile control buttons */
+    .mobile-controls {
+      display: none; /* Hidden by default */
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      z-index: 100;
+      pointer-events: none; /* Let touches pass through to canvas */
+    }
+    
+    .control-btn {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    
+    #left-btn {
+      left: 40px;
+    }
+    
+    #right-btn {
+      left: 160px;
+    }
+    
+    #run-btn {
+      right: 160px;
+    }
+    
+    #jump-btn {
+      right: 40px;
+    }
   </style>
 </head>
 
@@ -25,6 +66,14 @@
   <!-- main game -->
   <div class="main-wrapper">
     <canvas class="game-screen"></canvas>
+    
+    <!-- Mobile control buttons -->
+    <div class="mobile-controls">
+      <div id="left-btn" class="control-btn">←</div>
+      <div id="right-btn" class="control-btn">→</div>
+      <div id="run-btn" class="control-btn">R</div>
+      <div id="jump-btn" class="control-btn">J</div>
+    </div>
   </div>
 
   <script src="js/View.js"></script>
@@ -61,6 +110,18 @@
         e.preventDefault();
       }
     }, { passive: false });
+    
+    // Show mobile controls only on touch devices
+    function isTouchDevice() {
+      return (('ontouchstart' in window) ||
+         (navigator.maxTouchPoints > 0) ||
+         (navigator.msMaxTouchPoints > 0));
+    }
+    
+    // Display mobile controls if on a touch device
+    if (isTouchDevice()) {
+      document.querySelector('.mobile-controls').style.display = 'block';
+    }
   </script>
 </body>
 
