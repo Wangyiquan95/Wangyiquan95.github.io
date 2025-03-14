@@ -524,19 +524,22 @@ document.addEventListener('DOMContentLoaded', function() {
         content.style.backgroundColor = 'white';
         content.style.padding = '20px';
         content.style.borderRadius = '10px';
-        content.style.maxWidth = '80%';
+        content.style.maxWidth = isMobile ? '90%' : '80%';
+        content.style.maxHeight = isMobile ? '80vh' : '90vh';
+        content.style.overflowY = 'auto';
         content.style.textAlign = 'center';
         
         // Add title
         const title = document.createElement('h2');
         title.textContent = 'Game Over!';
         title.style.marginTop = '0';
+        title.style.fontSize = isMobile ? '1.5em' : '2em';
         content.appendChild(title);
         
         // Add score
         const scoreText = document.createElement('p');
         scoreText.textContent = `Your score: ${finalScore}`;
-        scoreText.style.fontSize = '1.2em';
+        scoreText.style.fontSize = isMobile ? '1.1em' : '1.2em';
         content.appendChild(scoreText);
         
         // Add high score message
@@ -550,7 +553,7 @@ document.addEventListener('DOMContentLoaded', function() {
             congrats.textContent = '🎉 Congratulations! New high score! 🎉';
             congrats.style.color = '#FF9900';
             congrats.style.fontWeight = 'bold';
-            congrats.style.fontSize = '1.2em';
+            congrats.style.fontSize = isMobile ? '1.1em' : '1.2em';
             content.appendChild(congrats);
         }
         
@@ -561,30 +564,31 @@ document.addEventListener('DOMContentLoaded', function() {
         rankingsTitle.style.marginBottom = '10px';
         content.appendChild(rankingsTitle);
         
-        // Create rankings table
+        // Create rankings table with responsive design
         const rankingsTable = document.createElement('table');
         rankingsTable.style.width = '100%';
         rankingsTable.style.marginBottom = '20px';
         rankingsTable.style.borderCollapse = 'collapse';
+        rankingsTable.style.fontSize = isMobile ? '0.9em' : '1em';
         
         // Add table header
         const tableHeader = document.createElement('tr');
         
         const rankHeader = document.createElement('th');
         rankHeader.textContent = 'Rank';
-        rankHeader.style.padding = '5px';
+        rankHeader.style.padding = isMobile ? '3px' : '5px';
         rankHeader.style.borderBottom = '1px solid #ddd';
         tableHeader.appendChild(rankHeader);
         
         const nameHeader = document.createElement('th');
         nameHeader.textContent = 'Name';
-        nameHeader.style.padding = '5px';
+        nameHeader.style.padding = isMobile ? '3px' : '5px';
         nameHeader.style.borderBottom = '1px solid #ddd';
         tableHeader.appendChild(nameHeader);
         
         const scoreHeader = document.createElement('th');
         scoreHeader.textContent = 'Score';
-        scoreHeader.style.padding = '5px';
+        scoreHeader.style.padding = isMobile ? '3px' : '5px';
         scoreHeader.style.borderBottom = '1px solid #ddd';
         tableHeader.appendChild(scoreHeader);
         
@@ -601,17 +605,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const rankCell = document.createElement('td');
             rankCell.textContent = `#${index + 1}`;
-            rankCell.style.padding = '5px';
+            rankCell.style.padding = isMobile ? '3px' : '5px';
             row.appendChild(rankCell);
             
             const nameCell = document.createElement('td');
             nameCell.textContent = topScore.name;
-            nameCell.style.padding = '5px';
+            nameCell.style.padding = isMobile ? '3px' : '5px';
             row.appendChild(nameCell);
             
             const scoreCell = document.createElement('td');
             scoreCell.textContent = topScore.score;
-            scoreCell.style.padding = '5px';
+            scoreCell.style.padding = isMobile ? '3px' : '5px';
             row.appendChild(scoreCell);
             
             rankingsTable.appendChild(row);
@@ -636,16 +640,24 @@ document.addEventListener('DOMContentLoaded', function() {
             content.appendChild(playerRankMsg);
         }
         
+        // Create button container for better mobile layout
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.flexDirection = isMobile ? 'column' : 'row';
+        buttonContainer.style.justifyContent = 'center';
+        buttonContainer.style.gap = '10px';
+        buttonContainer.style.marginTop = '15px';
+        
         // Add share button
         const shareButton = document.createElement('button');
         shareButton.textContent = 'Share Score';
-        shareButton.style.padding = '10px 15px';
-        shareButton.style.margin = '10px';
+        shareButton.style.padding = isMobile ? '12px 15px' : '10px 15px';
         shareButton.style.backgroundColor = '#4267B2';
         shareButton.style.color = 'white';
         shareButton.style.border = 'none';
         shareButton.style.borderRadius = '5px';
         shareButton.style.cursor = 'pointer';
+        shareButton.style.width = isMobile ? '100%' : 'auto';
         
         shareButton.addEventListener('click', function() {
             const shareText = `I scored ${finalScore} points in Suika Journal! Can you beat my score?`;
@@ -669,7 +681,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 copyToClipboard(shareText + ' ' + shareUrl);
             }
         });
-        content.appendChild(shareButton);
         
         // Helper function to copy text to clipboard
         function copyToClipboard(text) {
@@ -700,18 +711,22 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add play again button
         const playAgainButton = document.createElement('button');
         playAgainButton.textContent = 'Play Again';
-        playAgainButton.style.padding = '10px 15px';
-        playAgainButton.style.margin = '10px';
+        playAgainButton.style.padding = isMobile ? '12px 15px' : '10px 15px';
         playAgainButton.style.backgroundColor = '#4CAF50';
         playAgainButton.style.color = 'white';
         playAgainButton.style.border = 'none';
         playAgainButton.style.borderRadius = '5px';
         playAgainButton.style.cursor = 'pointer';
+        playAgainButton.style.width = isMobile ? '100%' : 'auto';
         
         playAgainButton.addEventListener('click', function() {
             location.reload();
         });
-        content.appendChild(playAgainButton);
+        
+        // Add buttons to container instead of directly to content
+        buttonContainer.appendChild(shareButton);
+        buttonContainer.appendChild(playAgainButton);
+        content.appendChild(buttonContainer);
         
         // Add modal to page
         modal.appendChild(content);
@@ -755,13 +770,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-// Remove this code that was outside the DOMContentLoaded handler
-// window.addEventListener('resize', function() {
-//     // Update mobile status
-//     const newIsMobile = window.innerWidth <= 768;
-//     if (newIsMobile !== isMobile) {
-//         // Reload the page if mobile status changed
-//         location.reload();
-//     }
-// });
