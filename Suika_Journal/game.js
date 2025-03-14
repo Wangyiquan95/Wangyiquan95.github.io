@@ -119,16 +119,123 @@ document.addEventListener('DOMContentLoaded', function() {
     let gameOver = false;
     let highScore = localStorage.getItem('suikaHighScore') || 0; // Load high score from localStorage
     
-    // Global top scores (you can define these)
-    const globalTopScores = [
-        { name: "Jennif", score: 1999 },
-        { name: "Lucia", score: 1944 },
-        { name: "Rainyday", score: 1930 }
-    ];
+    // Global top scores - will be fetched from Google Sheets
+    let globalTopScores = [];
+    
+    // Fetch global top scores from Google Sheets
+    async function fetchGlobalTopScores() {
+        try {
+            // Use the provided CSV URL for Google Sheets
+            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSnKBUjt0fNuCyGbcG3T48ubLFcYD48maSrNotKHvTjwam80M5DtUMlwRbq1zXf_8MydhLb25mPQzm5/pub?output=csv';
+            
+            // Use a CORS proxy to bypass the CORS restriction
+            const corsProxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            
+            // Try with CORS proxy first
+            try {
+                const response = await fetch(corsProxyUrl + url);
+                const csvText = await response.text();
+                processCSVData(csvText);
+            } catch (proxyError) {
+                console.error('Error using CORS proxy:', proxyError);
+                
+                // Fallback to no-cors mode (will result in opaque response)
+                // This won't give us the data but will prevent the error
+                console.log('Falling back to no-cors mode (will use default scores)');
+                await fetch(url, { mode: 'no-cors' });
+                
+                // Since we can't access the data in no-cors mode, use default scores
+                useDefaultScores();
+            }
+        } catch (error) {
+            console.error('Error fetching global scores:', error);
+            useDefaultScores();
+        }
+        
+        // Helper function to process CSV data
+        function processCSVData(csvText) {
+            // Parse CSV data
+            const rows = csvText.split('\n').map(row => row.split(','));
+            
+            // Skip header row if it exists
+            const dataRows = rows[0][0].toLowerCase().includes('name') ? rows.slice(1) : rows;
+            
+            // Process the data (assuming columns are: Name, Score)
+            const topScores = [];
+            
+            for (let i = 0; i < dataRows.length && i < 3; i++) {
+                if (dataRows[i].length >= 2) {
+                    topScores.push({
+                        name: dataRows[i][0] || 'Anonymous',
+                        score: parseInt(dataRows[i][1]) || 0
+                    });
+                }
+            }
+            
+            // Sort by score (highest first)
+            topScores.sort((a, b) => b.score - a.score);
+            
+            // Take only top 3
+            globalTopScores = topScores.slice(0, 3);
+            
+            console.log('Fetched global top scores:', globalTopScores);
+        }
+        
+        // Helper function to use default scores
+        function useDefaultScores() {
+            globalTopScores = [
+                { name: "Jennif", score: 1999 },
+                { name: "Lucia", score: 1944 },
+                { name: "Rainyday", score: 1930 }
+            ];
+            console.log('Using default scores:', globalTopScores);
+        }
+    }
+    
+    // Fetch scores at game start
+    fetchGlobalTopScores();
     
     // Update high score display if it exists
     if (document.getElementById('high-score')) {
         document.getElementById('high-score').textContent = highScore;
+    }
+    
+    // Function to submit score to Google Sheets
+    async function submitScore(playerName, playerScore) {
+        try {
+            // Use the provided Google Apps Script URL
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbyxO-G2vBp-wJnwG8KLKs5h0DVAJ54cicnBNs47EsPLKgdBJ_epQwvu5Mc7JovZJJOnkg/exec';
+            
+            // Create URL with parameters - ensure they're properly formatted
+            const url = `${scriptUrl}?name=${encodeURIComponent(playerName)}&score=${encodeURIComponent(playerScore)}`;
+            
+            console.log('Submitting score to:', url);
+            
+            // Use XMLHttpRequest instead of fetch for better cross-origin support
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                
+                xhr.onload = function() {
+                    console.log('Score submission response received');
+                    
+                    // Refresh the global scores after submission
+                    setTimeout(fetchGlobalTopScores, 2000); // Wait 2 seconds for the sheet to update
+                    
+                    resolve(true);
+                };
+                
+                xhr.onerror = function() {
+                    console.error('Error submitting score via XMLHttpRequest');
+                    reject(false);
+                };
+                
+                xhr.send();
+            });
+        } catch (error) {
+            console.error('Error submitting score:', error);
+            return false;
+        }
     }
 
     // Get random fruit (only from the first 5 types)
@@ -590,7 +697,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         rankingsTable.appendChild(tableHeader);
         
-        // Add top 3 scores
+        // Add top 3 scores from Google Sheets
         globalTopScores.forEach((topScore, index) => {
             const row = document.createElement('tr');
             
@@ -634,6 +741,52 @@ document.addEventListener('DOMContentLoaded', function() {
             playerRankMsg.style.fontWeight = 'bold';
             playerRankMsg.style.color = '#4CAF50';
             content.appendChild(playerRankMsg);
+            
+            // Add option to submit score if it's in the top 3
+            const submitScoreDiv = document.createElement('div');
+            submitScoreDiv.style.margin = '15px 0';
+            
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.placeholder = 'Enter your name';
+            nameInput.maxLength = 15;
+            nameInput.style.padding = '8px';
+            nameInput.style.marginRight = '10px';
+            nameInput.style.borderRadius = '4px';
+            nameInput.style.border = '1px solid #ccc';
+            
+            const submitButton = document.createElement('button');
+            submitButton.textContent = 'Submit Score';
+            submitButton.style.padding = '8px 15px';
+            submitButton.style.backgroundColor = '#4CAF50';
+            submitButton.style.color = 'white';
+            submitButton.style.border = 'none';
+            submitButton.style.borderRadius = '4px';
+            submitButton.style.cursor = 'pointer';
+            
+            submitButton.addEventListener('click', async function() {
+                if (nameInput.value.trim() === '') {
+                    alert('Please enter your name');
+                    return;
+                }
+                
+                submitButton.disabled = true;
+                submitButton.textContent = 'Submitting...';
+                
+                const success = await submitScore(nameInput.value.trim(), finalScore);
+                
+                if (success) {
+                    submitScoreDiv.innerHTML = '<p style="color: #4CAF50; font-weight: bold;">Score submitted successfully!</p>';
+                } else {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Try Again';
+                    alert('Failed to submit score. Please try again.');
+                }
+            });
+            
+            submitScoreDiv.appendChild(nameInput);
+            submitScoreDiv.appendChild(submitButton);
+            content.appendChild(submitScoreDiv);
         }
         
         // Add share button
