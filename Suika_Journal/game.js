@@ -211,26 +211,58 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Submitting score to:', url);
             
-            // Use XMLHttpRequest instead of fetch for better cross-origin support
+            // Use JSONP, which is a technique that can bypass CORS restrictions:
             return new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
+                // Create a unique callback name
+                const callbackName = 'jsonpCallback_' + Date.now();
                 
-                xhr.onload = function() {
-                    console.log('Score submission response received');
+                // Create a script element
+                const script = document.createElement('script');
+                
+                // Set timeout for the request
+                const timeoutId = setTimeout(() => {
+                    // Clean up if the request times out
+                    document.body.removeChild(script);
+                    delete window[callbackName];
+                    console.error('Score submission timed out');
+                    reject(false);
+                }, 10000); // 10 second timeout
+                
+                // Define the callback function
+                window[callbackName] = function(response) {
+                    // Clear the timeout
+                    clearTimeout(timeoutId);
+                    
+                    // Clean up
+                    document.body.removeChild(script);
+                    delete window[callbackName];
+                    
+                    console.log('Score submission response:', response);
                     
                     // Refresh the global scores after submission
-                    setTimeout(fetchGlobalTopScores, 2000); // Wait 2 seconds for the sheet to update
+                    setTimeout(fetchGlobalTopScores, 2000);
                     
                     resolve(true);
                 };
                 
-                xhr.onerror = function() {
-                    console.error('Error submitting score via XMLHttpRequest');
+                // Set the source of the script tag to include the callback parameter
+                script.src = `${url}&callback=${callbackName}`;
+                
+                // Handle script load error
+                script.onerror = function() {
+                    // Clear the timeout
+                    clearTimeout(timeoutId);
+                    
+                    // Clean up
+                    document.body.removeChild(script);
+                    delete window[callbackName];
+                    
+                    console.error('Error loading script for score submission');
                     reject(false);
                 };
                 
-                xhr.send();
+                // Add the script to the document to start the request
+                document.body.appendChild(script);
             });
         } catch (error) {
             console.error('Error submitting score:', error);
