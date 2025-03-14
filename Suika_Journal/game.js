@@ -119,140 +119,16 @@ document.addEventListener('DOMContentLoaded', function() {
     let gameOver = false;
     let highScore = localStorage.getItem('suikaHighScore') || 0; // Load high score from localStorage
     
-    // Global top scores - will be fetched from Google Sheets
-    let globalTopScores = [];
-    
-    // Fetch global top scores from Google Sheets
-    async function fetchGlobalTopScores() {
-        try {
-            // Use the provided CSV URL for Google Sheets
-            const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSnKBUjt0fNuCyGbcG3T48ubLFcYD48maSrNotKHvTjwam80M5DtUMlwRbq1zXf_8MydhLb25mPQzm5/pub?output=csv';
-            
-            // Use a CORS proxy to bypass the CORS restriction
-            const corsProxyUrl = 'https://cors-anywhere.herokuapp.com/';
-            
-            // Try with CORS proxy first
-            try {
-                const response = await fetch(corsProxyUrl + url);
-                const csvText = await response.text();
-                processCSVData(csvText);
-            } catch (proxyError) {
-                console.error('Error using CORS proxy:', proxyError);
-                
-                // Fallback to no-cors mode (will result in opaque response)
-                // This won't give us the data but will prevent the error
-                console.log('Falling back to no-cors mode (will use default scores)');
-                await fetch(url, { mode: 'no-cors' });
-                
-                // Since we can't access the data in no-cors mode, use default scores
-                useDefaultScores();
-            }
-        } catch (error) {
-            console.error('Error fetching global scores:', error);
-            useDefaultScores();
-        }
-        
-        // Helper function to process CSV data
-        function processCSVData(csvText) {
-            // Parse CSV data
-            const rows = csvText.split('\n').map(row => row.split(','));
-            
-            // Skip header row if it exists
-            const dataRows = rows[0][0].toLowerCase().includes('name') ? rows.slice(1) : rows;
-            
-            // Process the data (assuming columns are: Name, Score)
-            const topScores = [];
-            
-            for (let i = 0; i < dataRows.length && i < 3; i++) {
-                if (dataRows[i].length >= 2) {
-                    topScores.push({
-                        name: dataRows[i][0] || 'Anonymous',
-                        score: parseInt(dataRows[i][1]) || 0
-                    });
-                }
-            }
-            
-            // Sort by score (highest first)
-            topScores.sort((a, b) => b.score - a.score);
-            
-            // Take only top 3
-            globalTopScores = topScores.slice(0, 3);
-            
-            console.log('Fetched global top scores:', globalTopScores);
-        }
-        
-        // Helper function to use default scores
-        function useDefaultScores() {
-            globalTopScores = [
-                { name: "Jennif", score: 1999 },
-                { name: "Lucia", score: 1944 },
-                { name: "Rainyday", score: 1930 }
-            ];
-            console.log('Using default scores:', globalTopScores);
-        }
-    }
-    
-    // Fetch scores at game start
-    fetchGlobalTopScores();
+    // Global top scores (you can define these)
+    const globalTopScores = [
+        { name: "Yu", score: 4002 },
+        { name: "Chi", score: 3952 },
+        { name: "test", score: 3800 }
+    ];
     
     // Update high score display if it exists
     if (document.getElementById('high-score')) {
         document.getElementById('high-score').textContent = highScore;
-    }
-    
-    // Function to submit score to Google Sheets
-    async function submitScore(playerName, playerScore) {
-        try {
-            // Use the web app URL
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbyxO-G2vBp-wJnwG8KLKs5h0DVAJ54cicnBNs47EsPLKgdBJ_epQwvu5Mc7JovZJJOnkg/exec';
-            
-            console.log('Submitting score:', playerName, playerScore);
-            
-            // Use a simple GET request with an image tag (works across all browsers)
-            return new Promise((resolve) => {
-                // Create a unique timestamp to avoid caching
-                const timestamp = new Date().getTime();
-                
-                // Create an image element for the request
-                const img = new Image();
-                
-                // Set up load handler
-                img.onload = function() {
-                    console.log('Score submission completed');
-                    
-                    // Refresh the global scores after submission
-                    setTimeout(fetchGlobalTopScores, 2000);
-                    
-                    resolve(true);
-                };
-                
-                // Handle errors
-                img.onerror = function() {
-                    // Even if there's an error, the request might have gone through
-                    console.log('Score submission image loaded with error (but may have succeeded)');
-                    
-                    // Refresh the global scores after submission
-                    setTimeout(fetchGlobalTopScores, 2000);
-                    
-                    // Still resolve as true to provide better UX
-                    resolve(true);
-                };
-                
-                // Set source to trigger the request
-                img.src = `${scriptUrl}?name=${encodeURIComponent(playerName)}&score=${encodeURIComponent(playerScore)}&t=${timestamp}`;
-                
-                // Add a timeout to ensure we don't wait forever
-                setTimeout(() => {
-                    if (!img.complete) {
-                        console.log('Score submission timed out (but may have succeeded)');
-                        resolve(true);
-                    }
-                }, 5000);
-            });
-        } catch (error) {
-            console.error('Error submitting score:', error);
-            return false;
-        }
     }
 
     // Get random fruit (only from the first 5 types)
@@ -648,9 +524,7 @@ document.addEventListener('DOMContentLoaded', function() {
         content.style.backgroundColor = 'white';
         content.style.padding = '20px';
         content.style.borderRadius = '10px';
-        content.style.maxWidth = isMobile ? '90%' : '80%';
-        content.style.maxHeight = isMobile ? '80vh' : '90vh';
-        content.style.overflowY = 'auto';
+        content.style.maxWidth = '80%';
         content.style.textAlign = 'center';
         
         // Add title
@@ -687,12 +561,11 @@ document.addEventListener('DOMContentLoaded', function() {
         rankingsTitle.style.marginBottom = '10px';
         content.appendChild(rankingsTitle);
         
-        // Create rankings table with responsive styling
+        // Create rankings table
         const rankingsTable = document.createElement('table');
         rankingsTable.style.width = '100%';
         rankingsTable.style.marginBottom = '20px';
         rankingsTable.style.borderCollapse = 'collapse';
-        rankingsTable.style.tableLayout = 'fixed'; // Fixed layout for better mobile display
         
         // Add table header
         const tableHeader = document.createElement('tr');
@@ -701,26 +574,23 @@ document.addEventListener('DOMContentLoaded', function() {
         rankHeader.textContent = 'Rank';
         rankHeader.style.padding = '5px';
         rankHeader.style.borderBottom = '1px solid #ddd';
-        rankHeader.style.width = '20%';
         tableHeader.appendChild(rankHeader);
         
         const nameHeader = document.createElement('th');
         nameHeader.textContent = 'Name';
         nameHeader.style.padding = '5px';
         nameHeader.style.borderBottom = '1px solid #ddd';
-        nameHeader.style.width = '50%';
         tableHeader.appendChild(nameHeader);
         
         const scoreHeader = document.createElement('th');
         scoreHeader.textContent = 'Score';
         scoreHeader.style.padding = '5px';
         scoreHeader.style.borderBottom = '1px solid #ddd';
-        scoreHeader.style.width = '30%';
         tableHeader.appendChild(scoreHeader);
         
         rankingsTable.appendChild(tableHeader);
         
-        // Add top 3 scores from Google Sheets
+        // Add top 3 scores
         globalTopScores.forEach((topScore, index) => {
             const row = document.createElement('tr');
             
@@ -737,9 +607,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const nameCell = document.createElement('td');
             nameCell.textContent = topScore.name;
             nameCell.style.padding = '5px';
-            nameCell.style.wordBreak = 'break-word'; // Handle long names
-            nameCell.style.overflow = 'hidden';
-            nameCell.style.textOverflow = 'ellipsis';
             row.appendChild(nameCell);
             
             const scoreCell = document.createElement('td');
@@ -767,69 +634,7 @@ document.addEventListener('DOMContentLoaded', function() {
             playerRankMsg.style.fontWeight = 'bold';
             playerRankMsg.style.color = '#4CAF50';
             content.appendChild(playerRankMsg);
-            
-            // Add option to submit score if it's in the top 3
-            const submitScoreDiv = document.createElement('div');
-            submitScoreDiv.style.margin = '15px 0';
-            
-            // For mobile, stack the input and button vertically
-            if (isMobile) {
-                submitScoreDiv.style.display = 'flex';
-                submitScoreDiv.style.flexDirection = 'column';
-                submitScoreDiv.style.alignItems = 'center';
-            }
-            
-            const nameInput = document.createElement('input');
-            nameInput.type = 'text';
-            nameInput.placeholder = 'Enter your name';
-            nameInput.maxLength = 15;
-            nameInput.style.padding = '8px';
-            nameInput.style.marginRight = isMobile ? '0' : '10px';
-            nameInput.style.marginBottom = isMobile ? '10px' : '0';
-            nameInput.style.borderRadius = '4px';
-            nameInput.style.border = '1px solid #ccc';
-            nameInput.style.width = isMobile ? '80%' : 'auto';
-            
-            const submitButton = document.createElement('button');
-            submitButton.textContent = 'Submit Score';
-            submitButton.style.padding = '8px 15px';
-            submitButton.style.backgroundColor = '#4CAF50';
-            submitButton.style.color = 'white';
-            submitButton.style.border = 'none';
-            submitButton.style.borderRadius = '4px';
-            submitButton.style.cursor = 'pointer';
-            submitButton.style.width = isMobile ? '80%' : 'auto';
-            
-            submitButton.addEventListener('click', async function() {
-                if (nameInput.value.trim() === '') {
-                    alert('Please enter your name');
-                    return;
-                }
-                
-                submitButton.disabled = true;
-                submitButton.textContent = 'Submitting...';
-                
-                const success = await submitScore(nameInput.value.trim(), finalScore);
-                
-                if (success) {
-                    submitScoreDiv.innerHTML = '<p style="color: #4CAF50; font-weight: bold;">Score submitted successfully!</p>';
-                } else {
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Try Again';
-                    alert('Failed to submit score. Please try again.');
-                }
-            });
-            
-            submitScoreDiv.appendChild(nameInput);
-            submitScoreDiv.appendChild(submitButton);
-            content.appendChild(submitScoreDiv);
         }
-        
-        // Add action buttons in a responsive container
-        const buttonContainer = document.createElement('div');
-        buttonContainer.style.display = 'flex';
-        buttonContainer.style.justifyContent = 'center';
-        buttonContainer.style.flexWrap = 'wrap';
         
         // Add share button
         const shareButton = document.createElement('button');
@@ -842,23 +647,6 @@ document.addEventListener('DOMContentLoaded', function() {
         shareButton.style.borderRadius = '5px';
         shareButton.style.cursor = 'pointer';
         
-        // Add play again button
-        const playAgainButton = document.createElement('button');
-        playAgainButton.textContent = 'Play Again';
-        playAgainButton.style.padding = '10px 15px';
-        playAgainButton.style.margin = '10px';
-        playAgainButton.style.backgroundColor = '#4CAF50';
-        playAgainButton.style.color = 'white';
-        playAgainButton.style.border = 'none';
-        playAgainButton.style.borderRadius = '5px';
-        playAgainButton.style.cursor = 'pointer';
-        
-        // Add buttons to container
-        buttonContainer.appendChild(shareButton);
-        buttonContainer.appendChild(playAgainButton);
-        content.appendChild(buttonContainer);
-        
-        // Share button functionality
         shareButton.addEventListener('click', function() {
             const shareText = `I scored ${finalScore} points in Suika Journal! Can you beat my score?`;
             const shareUrl = window.location.href;
@@ -881,11 +669,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 copyToClipboard(shareText + ' ' + shareUrl);
             }
         });
-        
-        // Play again button functionality
-        playAgainButton.addEventListener('click', function() {
-            location.reload();
-        });
+        content.appendChild(shareButton);
         
         // Helper function to copy text to clipboard
         function copyToClipboard(text) {
@@ -912,6 +696,22 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.removeChild(textArea);
             return successful;
         }
+        
+        // Add play again button
+        const playAgainButton = document.createElement('button');
+        playAgainButton.textContent = 'Play Again';
+        playAgainButton.style.padding = '10px 15px';
+        playAgainButton.style.margin = '10px';
+        playAgainButton.style.backgroundColor = '#4CAF50';
+        playAgainButton.style.color = 'white';
+        playAgainButton.style.border = 'none';
+        playAgainButton.style.borderRadius = '5px';
+        playAgainButton.style.cursor = 'pointer';
+        
+        playAgainButton.addEventListener('click', function() {
+            location.reload();
+        });
+        content.appendChild(playAgainButton);
         
         // Add modal to page
         modal.appendChild(content);
