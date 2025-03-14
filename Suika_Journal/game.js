@@ -203,51 +203,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to submit score to Google Sheets
     async function submitScore(playerName, playerScore) {
         try {
-            // Use the provided Google Apps Script URL
+            // Use the web app URL
             const scriptUrl = 'https://script.google.com/macros/s/AKfycbyxO-G2vBp-wJnwG8KLKs5h0DVAJ54cicnBNs47EsPLKgdBJ_epQwvu5Mc7JovZJJOnkg/exec';
             
             console.log('Submitting score:', playerName, playerScore);
             
-            // Create a hidden iframe for form submission
+            // Use a simple GET request with an image tag (works across all browsers)
             return new Promise((resolve) => {
-                // Create a hidden iframe
-                const iframe = document.createElement('iframe');
-                iframe.name = 'submit-frame-' + Date.now();
-                iframe.style.display = 'none';
-                document.body.appendChild(iframe);
+                // Create a unique timestamp to avoid caching
+                const timestamp = new Date().getTime();
                 
-                // Create a form that targets the iframe
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = scriptUrl;
-                form.target = iframe.name;
+                // Create an image element for the request
+                const img = new Image();
                 
-                // Add the name input
-                const nameInput = document.createElement('input');
-                nameInput.type = 'hidden';
-                nameInput.name = 'name';
-                nameInput.value = playerName;
-                form.appendChild(nameInput);
-                
-                // Add the score input
-                const scoreInput = document.createElement('input');
-                scoreInput.type = 'hidden';
-                scoreInput.name = 'score';
-                scoreInput.value = playerScore;
-                form.appendChild(scoreInput);
-                
-                // Add form to document
-                document.body.appendChild(form);
-                
-                // Set up iframe load handler
-                iframe.onload = function() {
+                // Set up load handler
+                img.onload = function() {
                     console.log('Score submission completed');
-                    
-                    // Clean up
-                    setTimeout(() => {
-                        document.body.removeChild(form);
-                        document.body.removeChild(iframe);
-                    }, 1000);
                     
                     // Refresh the global scores after submission
                     setTimeout(fetchGlobalTopScores, 2000);
@@ -256,20 +227,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
                 
                 // Handle errors
-                iframe.onerror = function() {
-                    console.error('Error in iframe loading');
+                img.onerror = function() {
+                    // Even if there's an error, the request might have gone through
+                    console.log('Score submission image loaded with error (but may have succeeded)');
                     
-                    // Clean up
-                    document.body.removeChild(form);
-                    document.body.removeChild(iframe);
+                    // Refresh the global scores after submission
+                    setTimeout(fetchGlobalTopScores, 2000);
                     
                     // Still resolve as true to provide better UX
-                    // The score might still have been submitted even if we can't confirm
                     resolve(true);
                 };
                 
-                // Submit the form
-                form.submit();
+                // Set source to trigger the request
+                img.src = `${scriptUrl}?name=${encodeURIComponent(playerName)}&score=${encodeURIComponent(playerScore)}&t=${timestamp}`;
+                
+                // Add a timeout to ensure we don't wait forever
+                setTimeout(() => {
+                    if (!img.complete) {
+                        console.log('Score submission timed out (but may have succeeded)');
+                        resolve(true);
+                    }
+                }, 5000);
             });
         } catch (error) {
             console.error('Error submitting score:', error);
@@ -670,7 +648,9 @@ document.addEventListener('DOMContentLoaded', function() {
         content.style.backgroundColor = 'white';
         content.style.padding = '20px';
         content.style.borderRadius = '10px';
-        content.style.maxWidth = '80%';
+        content.style.maxWidth = isMobile ? '90%' : '80%';
+        content.style.maxHeight = isMobile ? '80vh' : '90vh';
+        content.style.overflowY = 'auto';
         content.style.textAlign = 'center';
         
         // Add title
@@ -707,11 +687,12 @@ document.addEventListener('DOMContentLoaded', function() {
         rankingsTitle.style.marginBottom = '10px';
         content.appendChild(rankingsTitle);
         
-        // Create rankings table
+        // Create rankings table with responsive styling
         const rankingsTable = document.createElement('table');
         rankingsTable.style.width = '100%';
         rankingsTable.style.marginBottom = '20px';
         rankingsTable.style.borderCollapse = 'collapse';
+        rankingsTable.style.tableLayout = 'fixed'; // Fixed layout for better mobile display
         
         // Add table header
         const tableHeader = document.createElement('tr');
@@ -720,18 +701,21 @@ document.addEventListener('DOMContentLoaded', function() {
         rankHeader.textContent = 'Rank';
         rankHeader.style.padding = '5px';
         rankHeader.style.borderBottom = '1px solid #ddd';
+        rankHeader.style.width = '20%';
         tableHeader.appendChild(rankHeader);
         
         const nameHeader = document.createElement('th');
         nameHeader.textContent = 'Name';
         nameHeader.style.padding = '5px';
         nameHeader.style.borderBottom = '1px solid #ddd';
+        nameHeader.style.width = '50%';
         tableHeader.appendChild(nameHeader);
         
         const scoreHeader = document.createElement('th');
         scoreHeader.textContent = 'Score';
         scoreHeader.style.padding = '5px';
         scoreHeader.style.borderBottom = '1px solid #ddd';
+        scoreHeader.style.width = '30%';
         tableHeader.appendChild(scoreHeader);
         
         rankingsTable.appendChild(tableHeader);
@@ -753,6 +737,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const nameCell = document.createElement('td');
             nameCell.textContent = topScore.name;
             nameCell.style.padding = '5px';
+            nameCell.style.wordBreak = 'break-word'; // Handle long names
+            nameCell.style.overflow = 'hidden';
+            nameCell.style.textOverflow = 'ellipsis';
             row.appendChild(nameCell);
             
             const scoreCell = document.createElement('td');
@@ -785,14 +772,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const submitScoreDiv = document.createElement('div');
             submitScoreDiv.style.margin = '15px 0';
             
+            // For mobile, stack the input and button vertically
+            if (isMobile) {
+                submitScoreDiv.style.display = 'flex';
+                submitScoreDiv.style.flexDirection = 'column';
+                submitScoreDiv.style.alignItems = 'center';
+            }
+            
             const nameInput = document.createElement('input');
             nameInput.type = 'text';
             nameInput.placeholder = 'Enter your name';
             nameInput.maxLength = 15;
             nameInput.style.padding = '8px';
-            nameInput.style.marginRight = '10px';
+            nameInput.style.marginRight = isMobile ? '0' : '10px';
+            nameInput.style.marginBottom = isMobile ? '10px' : '0';
             nameInput.style.borderRadius = '4px';
             nameInput.style.border = '1px solid #ccc';
+            nameInput.style.width = isMobile ? '80%' : 'auto';
             
             const submitButton = document.createElement('button');
             submitButton.textContent = 'Submit Score';
@@ -802,6 +798,7 @@ document.addEventListener('DOMContentLoaded', function() {
             submitButton.style.border = 'none';
             submitButton.style.borderRadius = '4px';
             submitButton.style.cursor = 'pointer';
+            submitButton.style.width = isMobile ? '80%' : 'auto';
             
             submitButton.addEventListener('click', async function() {
                 if (nameInput.value.trim() === '') {
@@ -828,6 +825,12 @@ document.addEventListener('DOMContentLoaded', function() {
             content.appendChild(submitScoreDiv);
         }
         
+        // Add action buttons in a responsive container
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.justifyContent = 'center';
+        buttonContainer.style.flexWrap = 'wrap';
+        
         // Add share button
         const shareButton = document.createElement('button');
         shareButton.textContent = 'Share Score';
@@ -839,6 +842,23 @@ document.addEventListener('DOMContentLoaded', function() {
         shareButton.style.borderRadius = '5px';
         shareButton.style.cursor = 'pointer';
         
+        // Add play again button
+        const playAgainButton = document.createElement('button');
+        playAgainButton.textContent = 'Play Again';
+        playAgainButton.style.padding = '10px 15px';
+        playAgainButton.style.margin = '10px';
+        playAgainButton.style.backgroundColor = '#4CAF50';
+        playAgainButton.style.color = 'white';
+        playAgainButton.style.border = 'none';
+        playAgainButton.style.borderRadius = '5px';
+        playAgainButton.style.cursor = 'pointer';
+        
+        // Add buttons to container
+        buttonContainer.appendChild(shareButton);
+        buttonContainer.appendChild(playAgainButton);
+        content.appendChild(buttonContainer);
+        
+        // Share button functionality
         shareButton.addEventListener('click', function() {
             const shareText = `I scored ${finalScore} points in Suika Journal! Can you beat my score?`;
             const shareUrl = window.location.href;
@@ -861,7 +881,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 copyToClipboard(shareText + ' ' + shareUrl);
             }
         });
-        content.appendChild(shareButton);
+        
+        // Play again button functionality
+        playAgainButton.addEventListener('click', function() {
+            location.reload();
+        });
         
         // Helper function to copy text to clipboard
         function copyToClipboard(text) {
@@ -888,22 +912,6 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.removeChild(textArea);
             return successful;
         }
-        
-        // Add play again button
-        const playAgainButton = document.createElement('button');
-        playAgainButton.textContent = 'Play Again';
-        playAgainButton.style.padding = '10px 15px';
-        playAgainButton.style.margin = '10px';
-        playAgainButton.style.backgroundColor = '#4CAF50';
-        playAgainButton.style.color = 'white';
-        playAgainButton.style.border = 'none';
-        playAgainButton.style.borderRadius = '5px';
-        playAgainButton.style.cursor = 'pointer';
-        
-        playAgainButton.addEventListener('click', function() {
-            location.reload();
-        });
-        content.appendChild(playAgainButton);
         
         // Add modal to page
         modal.appendChild(content);
