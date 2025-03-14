@@ -119,12 +119,79 @@ document.addEventListener('DOMContentLoaded', function() {
     let gameOver = false;
     let highScore = localStorage.getItem('suikaHighScore') || 0; // Load high score from localStorage
     
-    // Global top scores (you can define these)
-    const globalTopScores = [
-        { name: "Yu", score: 4002 },
-        { name: "Chi", score: 3952 },
-        { name: "test", score: 3800 }
+    // Global top scores - will be populated from Google Sheet
+    let globalTopScores = [
+        { name: "Loading...", score: 0 },
+        { name: "Loading...", score: 0 },
+        { name: "Loading...", score: 0 }
     ];
+    
+    // Function to fetch top scores from Google Sheet
+    function fetchTopScores() {
+        // Use a CORS proxy to access the Google Sheet
+        const sheetId = "2PACX-1vSnKBUjt0fNuCyGbcG3T48ubLFcYD48maSrNotKHvTjwam80M5DtUMlwRbq1zXf_8MydhLb25mPQzm5";
+        
+        // Option 1: Use a CORS proxy service
+        const corsProxyUrl = "https://corsproxy.io/?";
+        const sheetUrl = `${corsProxyUrl}https://docs.google.com/spreadsheets/d/e/${sheetId}/pub?output=csv`;
+        
+        // Option 2: Use the JSON endpoint instead of CSV (often has fewer CORS issues)
+        // const sheetUrl = `${corsProxyUrl}https://docs.google.com/spreadsheets/d/e/${sheetId}/pub?output=json`;
+        
+        fetch(sheetUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(data => {
+                // Parse CSV data
+                const rows = data.split('\n');
+                const headers = rows[0].split(',');
+                
+                // Find name and score column indexes
+                const nameIndex = headers.findIndex(h => h.toLowerCase().includes('name'));
+                const scoreIndex = headers.findIndex(h => h.toLowerCase().includes('score'));
+                
+                if (nameIndex === -1 || scoreIndex === -1) {
+                    throw new Error('Could not find name or score columns in the sheet');
+                }
+                
+                // Parse scores and sort by score (highest first)
+                const scores = [];
+                for (let i = 1; i < rows.length && i < 20; i++) { // Limit to first 20 rows
+                    const columns = rows[i].split(',');
+                    if (columns.length > Math.max(nameIndex, scoreIndex)) {
+                        const name = columns[nameIndex].trim();
+                        const score = parseInt(columns[scoreIndex].trim(), 10);
+                        if (name && !isNaN(score)) {
+                            scores.push({ name, score });
+                        }
+                    }
+                }
+                
+                // Sort by score (highest first)
+                scores.sort((a, b) => b.score - a.score);
+                
+                // Take top 3
+                globalTopScores = scores.slice(0, 3);
+                
+                console.log('Loaded top scores:', globalTopScores);
+            })
+            .catch(error => {
+                console.error('Error fetching top scores:', error);
+                // Fallback to default scores if fetch fails
+                globalTopScores = [
+                    { name: "Yu", score: 4002 },
+                    { name: "Chi", score: 3952 },
+                    { name: "Test", score: 3800 }
+                ];
+            });
+    }
+    
+    // Fetch top scores when game loads
+    fetchTopScores();
     
     // Update high score display if it exists
     if (document.getElementById('high-score')) {
@@ -595,31 +662,42 @@ document.addEventListener('DOMContentLoaded', function() {
         rankingsTable.appendChild(tableHeader);
         
         // Add top 3 scores
-        globalTopScores.forEach((topScore, index) => {
-            const row = document.createElement('tr');
-            
-            // Highlight row if player's score is higher
-            if (finalScore > topScore.score) {
-                row.style.opacity = '0.5';
-            }
-            
-            const rankCell = document.createElement('td');
-            rankCell.textContent = `#${index + 1}`;
-            rankCell.style.padding = isMobile ? '3px' : '5px';
-            row.appendChild(rankCell);
-            
-            const nameCell = document.createElement('td');
-            nameCell.textContent = topScore.name;
-            nameCell.style.padding = isMobile ? '3px' : '5px';
-            row.appendChild(nameCell);
-            
-            const scoreCell = document.createElement('td');
-            scoreCell.textContent = topScore.score;
-            scoreCell.style.padding = isMobile ? '3px' : '5px';
-            row.appendChild(scoreCell);
-            
-            rankingsTable.appendChild(row);
-        });
+        if (globalTopScores.length === 0) {
+            const loadingRow = document.createElement('tr');
+            const loadingCell = document.createElement('td');
+            loadingCell.textContent = 'Loading top scores...';
+            loadingCell.colSpan = 3;
+            loadingCell.style.textAlign = 'center';
+            loadingCell.style.padding = '10px';
+            loadingRow.appendChild(loadingCell);
+            rankingsTable.appendChild(loadingRow);
+        } else {
+            globalTopScores.forEach((topScore, index) => {
+                const row = document.createElement('tr');
+                
+                // Highlight row if player's score is higher
+                if (finalScore > topScore.score) {
+                    row.style.opacity = '0.5';
+                }
+                
+                const rankCell = document.createElement('td');
+                rankCell.textContent = `#${index + 1}`;
+                rankCell.style.padding = isMobile ? '3px' : '5px';
+                row.appendChild(rankCell);
+                
+                const nameCell = document.createElement('td');
+                nameCell.textContent = topScore.name;
+                nameCell.style.padding = isMobile ? '3px' : '5px';
+                row.appendChild(nameCell);
+                
+                const scoreCell = document.createElement('td');
+                scoreCell.textContent = topScore.score;
+                scoreCell.style.padding = isMobile ? '3px' : '5px';
+                row.appendChild(scoreCell);
+                
+                rankingsTable.appendChild(row);
+            });
+        }
         
         content.appendChild(rankingsTable);
         
