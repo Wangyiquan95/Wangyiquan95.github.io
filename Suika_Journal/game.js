@@ -737,6 +737,21 @@ document.addEventListener('DOMContentLoaded', function() {
         shareButton.style.cursor = 'pointer';
         shareButton.style.width = isMobile ? '100%' : 'auto';
         
+        // Add more games button with relative path
+        const moreGamesButton = document.createElement('button');
+        moreGamesButton.textContent = 'More Games';
+        moreGamesButton.style.padding = isMobile ? '12px 15px' : '10px 15px';
+        moreGamesButton.style.backgroundColor = '#FF9900';
+        moreGamesButton.style.color = 'white';
+        moreGamesButton.style.border = 'none';
+        moreGamesButton.style.borderRadius = '5px';
+        moreGamesButton.style.cursor = 'pointer';
+        moreGamesButton.style.width = isMobile ? '100%' : 'auto';
+        
+        moreGamesButton.addEventListener('click', function() {
+            window.location.href = '../BIO-GAME.html';
+        });
+        
         shareButton.addEventListener('click', function() {
             const shareText = `I scored ${finalScore} points in Suika Journal! Can you beat my score?`;
             const shareUrl = window.location.href;
@@ -803,6 +818,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Add buttons to container instead of directly to content
         buttonContainer.appendChild(shareButton);
+        buttonContainer.appendChild(moreGamesButton);
         buttonContainer.appendChild(playAgainButton);
         content.appendChild(buttonContainer);
         
