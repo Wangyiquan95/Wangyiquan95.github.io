@@ -286,15 +286,21 @@ var myIndex = 0;
 carousel();
 
 function carousel() {
-  var i;
-  var x = document.getElementsByClassName("mySlides");
-  for (i = 0; i < x.length; i++) {
-    x[i].style.display = "none";
+  // Get the carousel element
+  var carouselElement = document.querySelector('.slideshow-container'); // or whatever selector you're using
+  
+  // Only proceed if the element exists
+  if (carouselElement) {
+    var i;
+    var x = document.getElementsByClassName("mySlides");
+    for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";
+    }
+    myIndex++;
+    if (myIndex > x.length) {myIndex = 1}
+    x[myIndex-1].style.display = "block";
+    setTimeout(carousel, 4000); // Change image every 2 seconds
   }
-  myIndex++;
-  if (myIndex > x.length) {myIndex = 1}
-  x[myIndex-1].style.display = "block";
-  setTimeout(carousel, 4000); // Change image every 2 seconds
 }
 document.querySelectorAll('.gallery-image').forEach((image) => {
     image.addEventListener('mouseover', () => {
