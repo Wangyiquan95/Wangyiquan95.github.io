@@ -91,7 +91,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <label for="source" class="form-label">Source</label>
-                            <select id="source" class="form-select">
+                            <select id="source" class="form-select" onchange="updateDefaultQuery()">
                                 <option value="pubmed">PubMed</option>
                                 <option value="arxiv">arXiv</option>
                             </select>
@@ -172,5 +172,20 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        function updateDefaultQuery() {
+            const source = document.getElementById('source').value;
+            const queryInput = document.getElementById('query');
+            
+            if (source === 'pubmed') {
+                queryInput.value = "'Nature'[Journal] AND hasabstract[text]";
+            } else if (source === 'arxiv') {
+                queryInput.value = "quantitative biology";
+            }
+        }
+        
+        // Initialize default query on page load
+        document.addEventListener('DOMContentLoaded', updateDefaultQuery);
+    </script>
 </body>
 </html>

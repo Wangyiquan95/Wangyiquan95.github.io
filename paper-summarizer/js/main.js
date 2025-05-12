@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // arXiv API URL with CORS proxy
         // const arxivUrl = `https://cors-anywhere.herokuapp.com/http://export.arxiv.org/api/query?search_query=all:${encodeURIComponent(query)}&start=0&max_results=${maxResults}`;
         // Use one of these alternatives:
-        const arxivUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`http://export.arxiv.org/api/query?search_query=all:${query}&start=0&max_results=${maxResults}`)}`;
+        const arxivUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`http://export.arxiv.org/api/query?search_query=all:${query}&start=0&max_results=${maxResults}&sortBy=submittedDate&sortOrder=descending`)}`;
         
         try {
             const response = await fetch(arxivUrl);
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
     async function fetchFromPubmed(query, maxResults) {
         try {
             // PubMed API URLs
-            const searchUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${query}&retmax=${maxResults}&sort=relevance&retmode=json`)}`;
+            const searchUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${query}&retmax=${maxResults}&sort=pub+date&retmode=json`)}`;
             
             const searchResponse = await fetch(searchUrl);
             const searchData = await searchResponse.json();
