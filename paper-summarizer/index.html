@@ -11,6 +11,102 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles to improve readability */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 0.5rem;
+        }
+        
+        .card-header {
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+        
+        /* Improve list group item styling */
+        .list-group-item {
+            border-left: none;
+            border-right: none;
+            border-color: rgba(0,0,0,0.08);
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        /* Active state for list items */
+        .list-group-item.active {
+            background-color: #f0f7ff !important;
+            color: #0d6efd !important;
+            border-color: rgba(0,0,0,0.08);
+            font-weight: 500;
+            border-left: 3px solid #0d6efd;
+        }
+        
+        /* Hover state for list items */
+        .list-group-item:hover:not(.active) {
+            background-color: #f8f9fa;
+        }
+        
+        /* Paper title styling */
+        .paper-title {
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 0.25rem;
+        }
+        
+        /* Paper metadata styling */
+        .paper-meta {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        /* Paper summary styling */
+        .paper-summary {
+            line-height: 1.6;
+        }
+        
+        .paper-summary h3 {
+            font-size: 1.25rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #0d6efd;
+        }
+        
+        .paper-summary p {
+            margin-bottom: 1rem;
+        }
+        
+        /* Button styling */
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+        
+        /* Form control focus state */
+        .form-control:focus, .form-select:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        /* Navbar styling */
+        .navbar {
+            background-color: white !important;
+        }
+        
+        /* Footer styling */
+        footer {
+            background-color: #f8f9fa;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm sticky-top">
@@ -45,36 +141,41 @@
         </header>
         
         <div class="card mb-4 shadow-sm" id="api-config">
-            <div class="card-header bg-white py-3">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                 <h2 class="h5 mb-0 d-flex align-items-center">
                     <i class="bi bi-key me-2 text-primary"></i>
                     GROQ API Configuration
                 </h2>
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#apiConfigBody" aria-expanded="true" aria-controls="apiConfigBody">
+                    <i class="bi bi-chevron-up" id="apiConfigIcon"></i>
+                </button>
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label for="api-key" class="form-label">GROQ API Key</label>
-                    <div class="input-group">
-                        <input type="password" id="api-key" class="form-control" placeholder="Enter your GROQ API key">
-                        <button class="btn btn-outline-primary" type="button" id="toggle-api-key">
-                            <i class="bi bi-eye"></i> Show
-                        </button>
+            <div class="collapse show" id="apiConfigBody">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="api-key" class="form-label">GROQ API Key</label>
+                        <div class="input-group">
+                            <input type="password" id="api-key" class="form-control" placeholder="Enter your GROQ API key">
+                            <button class="btn btn-outline-primary" type="button" id="toggle-api-key">
+                                <i class="bi bi-eye"></i> Show
+                            </button>
+                        </div>
+                        <div class="form-text">Your API key is stored locally in your browser and never sent to our servers.</div>
+                        <button id="test-api-key" class="btn btn-sm btn-outline-primary mt-2">Test API Key</button>
+                        <div id="api-test-result" class="mt-2"></div>
                     </div>
-                    <div class="form-text">Your API key is stored locally in your browser and never sent to our servers.</div>
-                    <button id="test-api-key" class="btn btn-sm btn-outline-primary mt-2">Test API Key</button>
-                    <div id="api-test-result" class="mt-2"></div>
-                </div>
-                <div class="mb-3">
-                    <label for="model" class="form-label">Model</label>
-                    <select id="model" class="form-select">
-                        <option value="meta-llama/llama-4-scout-17b-16e-instruct">Meta Llama 4 Scout 17B</option>
-                        <option value="qwen-qwq-32b">Qwen QWQ 32B</option>
-                        <option value="llama-3.3-70b-versatile">LLaMA 3.3 70B Versatile</option>
-                        <option value="llama3-70b-8192">LLaMA 3 70B</option>
-                        <option value="llama3-8b-8192">LLaMA 3 8B</option>
-                        <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
-                        <option value="gemma-7b-it">Gemma 7B</option>
-                    </select>
+                    <div class="mb-3">
+                        <label for="model" class="form-label">Model</label>
+                        <select id="model" class="form-select">
+                            <option value="meta-llama/llama-4-scout-17b-16e-instruct">Meta Llama 4 Scout 17B</option>
+                            <option value="qwen-qwq-32b">Qwen QWQ 32B</option>
+                            <option value="llama-3.3-70b-versatile">LLaMA 3.3 70B Versatile</option>
+                            <option value="llama3-70b-8192">LLaMA 3 70B</option>
+                            <option value="llama3-8b-8192">LLaMA 3 8B</option>
+                            <option value="mixtral-8x7b-32768">Mixtral 8x7B</option>
+                            <option value="gemma-7b-it">Gemma 7B</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -88,19 +189,92 @@
             </div>
             <div class="card-body">
                 <form id="search-form">
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <label for="source" class="form-label">Source</label>
-                            <select id="source" class="form-select" onchange="updateDefaultQuery()">
-                                <option value="pubmed">PubMed</option>
-                                <option value="arxiv">arXiv</option>
-                            </select>
+                    <div class="mb-3">
+                        <label class="form-label">Search Mode</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="searchMode" id="queryMode" value="query" checked onchange="toggleSearchMode()">
+                            <label class="form-check-label" for="queryMode">
+                                Custom Query
+                            </label>
                         </div>
-                        <div class="col-md-6">
-                            <label for="query" class="form-label">Search Query</label>
-                            <input type="text" id="query" class="form-control" placeholder="e.g., CRISPR, COVID-19">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="searchMode" id="latestMode" value="latest" onchange="toggleSearchMode()">
+                            <label class="form-check-label" for="latestMode">
+                                Latest Papers from Journals
+                            </label>
                         </div>
                     </div>
+                    
+                    <div id="queryModeOptions">
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="source" class="form-label">Source</label>
+                                <select id="source" class="form-select" onchange="updateDefaultQuery()">
+                                    <option value="pubmed">PubMed</option>
+                                    <option value="arxiv">arXiv</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="query" class="form-label">Search Query</label>
+                                <input type="text" id="query" class="form-control" placeholder="e.g., CRISPR, COVID-19">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="latestModeOptions" style="display: none;">
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label for="journal" class="form-label">Journal</label>
+                                <select id="journal" class="form-select">
+                                    <optgroup label="Main Journals">
+                                        <option value="Nature">Nature</option>
+                                        <option value="Science">Science</option>
+                                        <option value="Cell">Cell</option>
+                                        <option value="N Engl J Med">New England Journal of Medicine</option>
+                                        <option value="Lancet">The Lancet</option>
+                                        <option value="Proc Natl Acad Sci U S A">PNAS</option>
+                                        <option value="J Virol">Journal of Virology</option>
+                                    </optgroup>
+                                    <optgroup label="Nature Journals">
+                                        <option value="Nat Immunol">Nature Immunology</option>
+                                        <option value="Nat Med">Nature Medicine</option>
+                                        <option value="Nat Biotechnol">Nature Biotechnology</option>
+                                        <option value="Nat Commun">Nature Communications</option>
+                                        <option value="Nat Rev Microbiol">Nature Reviews Microbiology</option>
+                                    </optgroup>
+                                    <optgroup label="Science Journals">
+                                        <option value="Sci Adv">Science Advances</option>
+                                        <option value="Sci Immunol">Science Immunology</option>
+                                        <option value="Sci Transl Med">Science Translational Medicine</option>
+                                        <option value="Sci Signal">Science Signaling</option>
+                                    </optgroup>
+                                    <optgroup label="Cell Journals">
+                                        <option value="Cell Rep">Cell Reports</option>
+                                        <option value="Cell Host Microbe">Cell Host & Microbe</option>
+                                        <option value="Cell Syst">Cell Systems</option>
+                                        <option value="Mol Cell">Molecular Cell</option>
+                                        <option value="Immunity">Immunity</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="timeframe" class="form-label">Time Frame</label>
+                                <select id="timeframe" class="form-select">
+                                    <option value="1">Last 1 month</option>
+                                    <option value="3">Last 3 months</option>
+                                    <option value="6">Last 6 months</option>
+                                    <option value="12">Last 12 months</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="includeReviews">
+                            <label class="form-check-label" for="includeReviews">
+                                Include Review Articles
+                            </label>
+                        </div>
+                    </div>
+                    
                     <div class="mb-3">
                         <label for="max-results" class="form-label">Maximum Results</label>
                         <input type="number" id="max-results" class="form-control" min="1" max="20" value="5">
@@ -178,14 +352,123 @@
             const queryInput = document.getElementById('query');
             
             if (source === 'pubmed') {
-                queryInput.value = "'Nature'[Journal] AND hasabstract[text]";
+                queryInput.value = "";
             } else if (source === 'arxiv') {
                 queryInput.value = "quantitative biology";
             }
         }
         
+        function toggleSearchMode() {
+            const queryMode = document.getElementById('queryMode').checked;
+            document.getElementById('queryModeOptions').style.display = queryMode ? 'block' : 'none';
+            document.getElementById('latestModeOptions').style.display = queryMode ? 'none' : 'block';
+            
+            // When Latest mode is selected, automatically set source to PubMed
+            if (!queryMode) {
+                document.getElementById('source').value = 'pubmed';
+            } else {
+                // When switching back to Query mode, reset the query to default
+                updateDefaultQuery();
+            }
+        }
+        
+        // Add event listener for API config collapse
+        document.addEventListener('DOMContentLoaded', function() {
+            const apiConfigBody = document.getElementById('apiConfigBody');
+            const apiConfigIcon = document.getElementById('apiConfigIcon');
+            
+            // Update icon when collapse state changes
+            apiConfigBody.addEventListener('hidden.bs.collapse', function () {
+                apiConfigIcon.classList.remove('bi-chevron-up');
+                apiConfigIcon.classList.add('bi-chevron-down');
+            });
+            
+            apiConfigBody.addEventListener('shown.bs.collapse', function () {
+                apiConfigIcon.classList.remove('bi-chevron-down');
+                apiConfigIcon.classList.add('bi-chevron-up');
+            });
+            
+            updateDefaultQuery();
+            toggleSearchMode();
+        });
+        
+        // Modify the form submission to handle both modes
+        document.getElementById('search-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get the search mode
+            const queryMode = document.getElementById('queryMode').checked;
+            let finalQuery = '';
+            let source = 'pubmed'; // Default to PubMed for latest papers mode
+            const maxResults = document.getElementById('max-results').value;
+            
+            if (queryMode) {
+                // Use the custom query
+                finalQuery = document.getElementById('query').value;
+                source = document.getElementById('source').value; // Get source from dropdown in query mode
+            } else {
+                // Build query for latest papers from selected journal
+                const journal = document.getElementById('journal').value;
+                const timeframe = document.getElementById('timeframe').value;
+                const includeReviews = document.getElementById('includeReviews').checked;
+                
+                // Base query for journal
+                finalQuery = `"${journal}"[Journal] AND hasabstract[text]`;
+                
+                // Add time constraint
+                if (timeframe) {
+                    finalQuery += ` AND ("last ${timeframe} months"[PDat])`;
+                }
+                
+                // Handle review articles
+                if (!includeReviews) {
+                    finalQuery += ' NOT Review[Publication Type]';
+                }
+                
+                // Latest papers mode always uses PubMed
+                source = 'pubmed';
+                
+                // Override any existing query in the query input field to avoid confusion
+                document.getElementById('query').value = finalQuery;
+            }
+            
+            // Show loading indicator
+            document.getElementById('loading-papers').classList.remove('d-none');
+            
+            // Clear previous results
+            const papersList = document.getElementById('papers-list');
+            papersList.innerHTML = '';
+            
+            // Call your search function with both parameters
+            console.log('Search query:', finalQuery);
+            console.log('Source:', source);
+            
+            // Call searchPapers with the correct parameters
+            searchPapers(finalQuery, source, maxResults);
+        });
+        
         // Initialize default query on page load
-        document.addEventListener('DOMContentLoaded', updateDefaultQuery);
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDefaultQuery();
+            toggleSearchMode();
+        });
+        
+        // Add this function to handle paper selection with improved styling
+        function selectPaper(paperId) {
+            // Remove active class from all papers
+            document.querySelectorAll('.list-group-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to selected paper
+            const selectedPaper = document.getElementById(`paper-${paperId}`);
+            if (selectedPaper) {
+                selectedPaper.classList.add('active');
+            }
+            
+            // Rest of your paper selection logic
+            // ...
+        }
     </script>
 </body>
 </html>
