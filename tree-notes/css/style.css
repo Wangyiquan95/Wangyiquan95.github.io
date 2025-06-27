@@ -1,0 +1,680 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    min-height: 100vh;
+    color: #1a1a1a;
+    overflow: hidden;
+}
+
+.container {
+    max-width: 100vw;
+    margin: 0 auto;
+    padding: 16px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Header with Glassmorphism */
+.header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    flex-shrink: 0;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+}
+
+.header h1 {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    background: linear-gradient(45deg, #fff, #e0e7ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 300;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Modern Buttons with Glassmorphism */
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.btn.active {
+    background: linear-gradient(135deg, rgba(240, 147, 251, 0.3), rgba(245, 87, 108, 0.3));
+    color: white;
+    box-shadow: 0 8px 32px rgba(240, 147, 251, 0.4);
+    transform: scale(1.05);
+    border: 1px solid rgba(240, 147, 251, 0.5);
+}
+
+.btn-primary { 
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+    border: 1px solid rgba(102, 126, 234, 0.4);
+    color: white; 
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.4), rgba(118, 75, 162, 0.4));
+    border: 1px solid rgba(102, 126, 234, 0.6);
+}
+
+.btn-secondary { 
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white; 
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-success { 
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.3));
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: white; 
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), rgba(5, 150, 105, 0.4));
+    border: 1px solid rgba(16, 185, 129, 0.6);
+}
+
+.btn-info { 
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(8, 145, 178, 0.3));
+    border: 1px solid rgba(6, 182, 212, 0.4);
+    color: white; 
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.4), rgba(8, 145, 178, 0.4));
+    border: 1px solid rgba(6, 182, 212, 0.6);
+}
+
+.btn-danger { 
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.3));
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: white; 
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.4), rgba(220, 38, 38, 0.4));
+    border: 1px solid rgba(239, 68, 68, 0.6);
+}
+
+.btn-warning { 
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.3));
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: white; 
+}
+
+.btn-warning:hover {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(217, 119, 6, 0.4));
+    border: 1px solid rgba(245, 158, 11, 0.6);
+}
+
+/* Main Content with Enhanced Glassmorphism */
+.main-content {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 16px 64px rgba(31, 38, 135, 0.2);
+    position: relative;
+}
+
+.canvas-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.02);
+    pointer-events: auto;
+}
+
+#connectionCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+.mind-map-area {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 5;
+    pointer-events: auto;
+}
+
+/* Enhanced Empty State */
+.empty-state {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.empty-state i {
+    font-size: 5rem;
+    margin-bottom: 24px;
+    opacity: 0.6;
+    background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.9; }
+}
+
+.empty-state h3 {
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Enhanced Mind Map Nodes */
+.mind-map-node {
+    position: absolute;
+    cursor: move;
+    user-select: none;
+    word-wrap: break-word;
+    z-index: 10;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.mind-map-node:hover {
+    z-index: 50;
+    filter: drop-shadow(0 12px 24px rgba(0,0,0,0.25));
+}
+
+.mind-map-node .node-text {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    word-break: break-word;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    pointer-events: none;
+    line-height: 1.4;
+}
+
+/* Enhanced Context Menu */
+.context-menu {
+    position: fixed;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+    z-index: 1000;
+    min-width: 180px;
+    overflow: hidden;
+    animation: contextMenuAppear 0.2s ease-out;
+}
+
+@keyframes contextMenuAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.context-item {
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.context-item:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    color: #4f46e5;
+}
+
+.context-item i {
+    width: 18px;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.context-item:hover i {
+    color: #4f46e5;
+}
+
+.context-separator {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(203, 213, 225, 0.5), transparent);
+    margin: 4px 0;
+}
+
+/* Enhanced Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to {
+        opacity: 1;
+        backdrop-filter: blur(8px);
+    }
+}
+
+.modal-content {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 32px;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-content h3 {
+    margin-bottom: 24px;
+    color: #1f2937;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+#editText {
+    width: 100%;
+    min-height: 120px;
+    padding: 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+#editText:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.color-picker {
+    margin-bottom: 24px;
+}
+
+.color-picker label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+.color-options {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.color-option {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.color-option::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    transform: translate(-50%, -50%);
+}
+
+.color-option:hover {
+    transform: scale(1.15);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+
+.color-option:hover::before {
+    width: 60%;
+    height: 60%;
+}
+
+.color-option.selected {
+    border-color: #1f2937;
+    transform: scale(1.15);
+    box-shadow: 0 0 0 2px rgba(31, 41, 55, 0.2), 0 8px 16px rgba(0,0,0,0.15);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* Enhanced Footer */
+.footer {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 12px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mode-indicator {
+    font-weight: 700;
+    background: linear-gradient(45deg, #f093fb, #f5576c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 12px;
+        gap: 12px;
+    }
+    
+    .header {
+        padding: 16px;
+        border-radius: 16px;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .toolbar {
+        gap: 8px;
+    }
+    
+    .btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    
+    .main-content {
+        border-radius: 16px;
+    }
+    
+    .modal-content {
+        padding: 24px;
+        margin: 20px;
+        border-radius: 16px;
+    }
+}
+
+@media (max-height: 600px) {
+    .header {
+        padding: 12px;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 4px;
+    }
+    
+    .header p {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+}
+
+/* Enhanced Animation for new nodes */
+@keyframes nodeAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.6) rotate(-5deg);
+        filter: blur(4px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+        filter: blur(0px);
+    }
+}
+
+.mind-map-node {
+    animation: nodeAppear 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Focus and accessibility */
+.btn:focus,
+.context-item:focus,
+.color-option:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* Custom scrollbar */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: rgba(241, 245, 249, 0.5);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a67d8, #68d391);
+}
+
+/* Connection lines enhancement */
+.canvas-container canvas {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* Sticky Notes */
+.sticky-note {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    z-index: 10;
+    box-sizing: border-box;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.sticky-note:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.sticky-header {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.sticky-header button:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.sticky-content {
+    font-family: inherit;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.sticky-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sticky-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sticky-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+}
+
+.sticky-edit-modal .modal-content {
+    max-width: 700px;
+}
+
+.resize-handle {
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+.sticky-note:hover .resize-handle {
+    opacity: 1;
+} 

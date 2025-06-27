@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Mind Map Notes - Visual Thinking Tool</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-project-diagram"></i> Mind Map Notes</h1>
+            <p>Create visual connections and organize your thoughts freely</p>
+            <div class="toolbar">
+                <button id="addNodeBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Node
+                </button>
+                <button id="addStickyBtn" class="btn btn-warning">
+                    <i class="fas fa-sticky-note"></i> Add Sticky Note
+                </button>
+                <button id="connectModeBtn" class="btn btn-secondary">
+                    <i class="fas fa-link"></i> Connect Mode
+                </button>
+                <button id="deleteModeBtn" class="btn btn-warning">
+                    <i class="fas fa-trash"></i> Delete Mode
+                </button>
+                <button id="saveBtn" class="btn btn-success">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button id="loadBtn" class="btn btn-info">
+                    <i class="fas fa-folder-open"></i> Load
+                </button>
+                <button id="exportBtn" class="btn btn-secondary">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button id="clearBtn" class="btn btn-danger">
+                    <i class="fas fa-trash-alt"></i> Clear All
+                </button>
+                <button id="fitViewBtn" class="btn btn-secondary">
+                    <i class="fas fa-expand"></i> Fit View
+                </button>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="canvas-container" id="canvasContainer">
+                <canvas id="connectionCanvas"></canvas>
+                <div id="mindMapArea" class="mind-map-area">
+                    <div class="empty-state" id="emptyState">
+                        <i class="fas fa-brain"></i>
+                        <h3>Start mapping your ideas</h3>
+                        <p>Click "Add Node" or "Add Sticky Note" to begin creating your mind map</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>
+                <span class="mode-indicator" id="modeIndicator">Move Mode</span> | 
+                <strong>Auto-saves every 2 min + on focus loss</strong> | 
+                <strong>Double-click</strong> empty space to create nodes | 
+                <strong>Ctrl+N:</strong> Add node | <strong>Ctrl+T:</strong> Add sticky note | 
+                <strong>Connect:</strong> Click button, then click two nodes | 
+                <strong>Delete:</strong> Click button, then click node
+            </p>
+        </footer>
+    </div>
+
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu hidden">
+        <div class="context-item" data-action="edit">
+            <i class="fas fa-edit"></i> Edit
+        </div>
+        <div class="context-item" data-action="duplicate">
+            <i class="fas fa-copy"></i> Duplicate
+        </div>
+        <div class="context-separator"></div>
+        <div class="context-item" data-action="changeColor">
+            <i class="fas fa-palette"></i> Change Color
+        </div>
+        <div class="context-separator"></div>
+        <div class="context-item" data-action="delete">
+            <i class="fas fa-trash"></i> Delete
+        </div>
+    </div>
+
+    <!-- Modal for editing -->
+    <div id="editModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Edit Node</h3>
+            <textarea id="editText" placeholder="Enter your text here..."></textarea>
+            <div class="color-picker">
+                <label>Node Color:</label>
+                <div class="color-options">
+                    <div class="color-option" data-color="#3b82f6" style="background: #3b82f6;"></div>
+                    <div class="color-option" data-color="#10b981" style="background: #10b981;"></div>
+                    <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
+                    <div class="color-option" data-color="#ef4444" style="background: #ef4444;"></div>
+                    <div class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;"></div>
+                    <div class="color-option" data-color="#06b6d4" style="background: #06b6d4;"></div>
+                    <div class="color-option" data-color="#84cc16" style="background: #84cc16;"></div>
+                    <div class="color-option" data-color="#6b7280" style="background: #6b7280;"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="saveEditBtn" class="btn btn-primary">Save</button>
+                <button id="cancelEditBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/MindMapNode.js"></script>
+    <script src="js/StickyNote.js"></script>
+    <script src="js/MindMapManager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html> 
