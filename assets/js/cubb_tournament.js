@@ -37,7 +37,25 @@ const players = {
 let currentDraw = [];
 let selectedPlayers = [];
 let isDrawn = false;
+let hasRevealed = false; // ensure only one card is revealed per draw (click OR drag)
 let particleSystem = null;
+
+// Build a unique pool of all players and track remaining players (no duplicates)
+const originalPool = [...players.ssr, ...players.sr, ...players.r];
+let remainingPool = [...originalPool];
+
+// Teams setup (exclude captains from pool)
+const teams = [
+    { id: 0, name: 'Team Huiyu', captain: 'Huiyu', members: [], hasSSR: false },
+    { id: 1, name: 'Team Yiquan', captain: 'Yiquan', members: [], hasSSR: false },
+    { id: 2, name: 'Team HOOK', captain: 'HOOK', members: [], hasSSR: false },
+    { id: 3, name: 'Team Sangrui', captain: 'Sangrui', members: [], hasSSR: false }
+];
+
+// Remove captains from remaining pool if present
+remainingPool = remainingPool.filter(p => !teams.some(t => t.captain === p.name));
+
+let activeTeamIndex = 0; // whose turn to draw
 
 // Particle System Class
 class ParticleSystem {
@@ -128,7 +146,7 @@ function playSound(soundId) {
 // Enhanced card creation with animations
 function createCard(player, index) {
     return `
-        <div class="card ${player.rarity.toLowerCase()}" id="card-${index}" onclick="selectCard(${index})" data-rarity="${player.rarity}">
+        <div class="card ${player.rarity.toLowerCase()}" id="card-${index}" draggable="true" ondragstart="onDragStart(event, ${index})" onclick="onCardClick(${index})" data-rarity="${player.rarity}">
             <div class="card-face card-back">
                 <div class="card-back-content">
                     <i class="fas fa-question"></i>
@@ -146,23 +164,21 @@ function createCard(player, index) {
 
 // Enhanced random player selection with rarity weights
 function getRandomPlayers() {
-    const allPlayers = [];
-    
-    // Add weighted selection (SSR rarer, R more common)
-    players.ssr.forEach(player => {
-        for (let i = 0; i < 2; i++) allPlayers.push(player); // Lower weight for SSR
-    });
-    
-    players.sr.forEach(player => {
-        for (let i = 0; i < 4; i++) allPlayers.push(player); // Medium weight for SR
-    });
-    
-    players.r.forEach(player => {
-        for (let i = 0; i < 6; i++) allPlayers.push(player); // Higher weight for R
-    });
-    
-    const shuffled = allPlayers.sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 4);
+    // Draw unique players from the remaining pool (no duplicates)
+    if (remainingPool.length === 0) return [];
+    const poolCopy = [...remainingPool];
+    // Shuffle pool copy
+    for (let i = poolCopy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [poolCopy[i], poolCopy[j]] = [poolCopy[j], poolCopy[i]];
+    }
+    const take = Math.min(4, poolCopy.length);
+    return poolCopy.slice(0, take);
+}
+
+function removePlayerFromPool(player) {
+    const idx = remainingPool.findIndex(p => p.name === player.name);
+    if (idx !== -1) remainingPool.splice(idx, 1);
 }
 
 // Enhanced draw cards function
@@ -210,14 +226,14 @@ function drawCards() {
     // Update button state
     const drawButton = document.getElementById('drawButton');
     drawButton.disabled = true;
-    drawButton.innerHTML = '<i class="fas fa-hand-pointer"></i><span>CHOOSE YOUR CHAMPION</span>';
+    drawButton.innerHTML = `<i class="fas fa-hand-pointer"></i><span>${teams[activeTeamIndex].name} PICK</span>`;
     isDrawn = true;
+    hasRevealed = false;
 }
 
 // Enhanced card selection
 function selectCard(cardIndex) {
     if (!isDrawn) return;
-    
     const selectedPlayer = currentDraw[cardIndex];
     const card = document.getElementById(`card-${cardIndex}`);
     const rect = card.getBoundingClientRect();
@@ -261,45 +277,46 @@ function selectCard(cardIndex) {
         }
     });
     
-    // Add to selected team after animation
+    // After reveal, enable drag-and-drop to any team panel
     setTimeout(() => {
-        selectedPlayers.push(selectedPlayer);
-        updateSelectedTeam();
-        updateTeamCounter();
-        
-        // Show success message
-        showNotification(`${selectedPlayer.name} (${selectedPlayer.rarity}) joined your team!`, selectedPlayer.rarity);
-        
-        resetDraw();
+        enableDropTargets(selectedPlayer);
+    }, 700);
+
+    // Add to selected team after animation if dropped (fallback auto-assign to active team after delay)
+    setTimeout(() => {
+        // If not assigned by drag within 1.4s, keep the state and wait for drop
     }, 1400);
 }
 
 // Enhanced team display
 function updateSelectedTeam() {
-    const teamContainer = document.getElementById('selectedTeam');
-    
-    if (selectedPlayers.length === 0) {
-        teamContainer.innerHTML = `
-            <div class="empty-team-message">
-                <i class="fas fa-plus-circle"></i>
-                <p>Draw cards to build your legendary team!</p>
-            </div>
-        `;
-        return;
-    }
-    
-    let teamHTML = '';
-    selectedPlayers.forEach((player, index) => {
-        teamHTML += `
-            <div class="selected-card ${player.rarity.toLowerCase()}" style="animation-delay: ${index * 0.1}s">
-                <img src="${player.image}" alt="${player.name}" class="card-image" onerror="this.src='images/favicon/android-chrome-192x192.png'">
-                <div class="card-name">${player.name}</div>
-                <div class="card-rarity ${player.rarity.toLowerCase()}">${player.rarity}</div>
+    const teamsContainer = document.getElementById('teamsContainer');
+    if (!teamsContainer) return;
+
+    let html = '';
+    teams.forEach((team, tIdx) => {
+        const activeClass = tIdx === activeTeamIndex ? 'active' : '';
+        html += `
+            <div class="team-panel ${activeClass}" data-team="${tIdx}" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, ${tIdx})">
+                <div class="team-header">
+                    <span class="captain-badge">Captain</span>
+                    <span class="team-name">${team.name}</span>
+                </div>
+                <div class="team-slot-area">
+                    ${team.members.map(m => `
+                        <div class="selected-card ${m.rarity.toLowerCase()}">
+                            <img src="${m.image}" class="card-image" onerror="this.src='images/favicon/android-chrome-192x192.png'">
+                            <div class="card-name">${m.name}</div>
+                            <div class="card-rarity ${m.rarity.toLowerCase()}">${m.rarity}</div>
+                        </div>
+                    `).join('')}
+                    <div class="drop-target">Drop here</div>
+                </div>
             </div>
         `;
     });
-    
-    teamContainer.innerHTML = teamHTML;
+
+    teamsContainer.innerHTML = html;
 }
 
 // Update team counter in navigation
@@ -395,6 +412,7 @@ function showNotification(message, rarity = 'r') {
 function resetAll() {
     resetDraw();
     selectedPlayers = [];
+    remainingPool = [...originalPool];
     updateSelectedTeam();
     updateTeamCounter();
     
@@ -442,3 +460,61 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('🎮 CUBB Tournament initialized! Press SPACE to draw cards, R to reset, or 1-4 to select cards.');
 });
+
+// Drag and Drop Handlers
+function onDragStart(evt, cardIndex) {
+    // Ensure reveal once
+    if (isDrawn && !hasRevealed) {
+        hasRevealed = true;
+        selectCard(cardIndex);
+    }
+    evt.dataTransfer.setData('text/plain', String(cardIndex));
+}
+
+function onDragOver(evt) {
+    evt.preventDefault();
+    const target = evt.currentTarget.querySelector('.drop-target');
+    if (target) target.classList.add('over');
+}
+
+function onDragLeave(evt) {
+    const target = evt.currentTarget.querySelector('.drop-target');
+    if (target) target.classList.remove('over');
+}
+
+function onDrop(evt, teamIndex) {
+    evt.preventDefault();
+    const idxStr = evt.dataTransfer.getData('text/plain');
+    if (!idxStr) return;
+    const cardIndex = parseInt(idxStr);
+    const player = currentDraw[cardIndex];
+    if (!player) return;
+
+    // Enforce SSR-per-team limit
+    const team = teams[teamIndex];
+    if (player.rarity === 'SSR' && team.hasSSR) {
+        showNotification(`${team.name} already has an SSR!`, 'SR');
+        return;
+    }
+
+    // Assign to team
+    team.members.push(player);
+    if (player.rarity === 'SSR') team.hasSSR = true;
+    selectedPlayers.push(player);
+    removePlayerFromPool(player);
+    updateSelectedTeam();
+    updateTeamCounter();
+
+    // Advance to next team turn
+    activeTeamIndex = (activeTeamIndex + 1) % teams.length;
+    updateSelectedTeam();
+
+    // Clear current draw and UI
+    resetDraw();
+}
+
+function onCardClick(cardIndex) {
+    if (!isDrawn || hasRevealed) return;
+    hasRevealed = true;
+    selectCard(cardIndex);
+}
