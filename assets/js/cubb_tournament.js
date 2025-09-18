@@ -46,10 +46,10 @@ let remainingPool = [...originalPool];
 
 // Teams setup (exclude captains from pool)
 const teams = [
-    { id: 0, name: 'Team Huiyu', captain: 'Huiyu', members: [], hasSSR: false },
-    { id: 1, name: 'Team Yiquan', captain: 'Yiquan', members: [], hasSSR: false },
-    { id: 2, name: 'Team HOOK', captain: 'HOOK', members: [], hasSSR: false },
-    { id: 3, name: 'Team Sangrui', captain: 'Sangrui', members: [], hasSSR: false }
+    { id: 0, name: 'Team Sangrui', captain: 'Sangrui', members: [], hasSSR: false },
+    { id: 1, name: 'Team HOOK', captain: 'HOOK', members: [], hasSSR: false },
+    { id: 2, name: 'Team Yiquan', captain: 'Yiquan', members: [], hasSSR: false },
+    { id: 3, name: 'Team Huiyu', captain: 'Huiyu', members: [], hasSSR: false }
 ];
 
 // Remove captains from remaining pool if present
