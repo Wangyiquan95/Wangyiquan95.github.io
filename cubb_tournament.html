@@ -1,0 +1,139 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KMEZE96SWW"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-KMEZE96SWW');
+    </script>
+    <title>CUBB Tournament - Epic Card Draw</title>
+    <link rel="icon" type="image/png" href="images/favicon/android-chrome-512x512.png" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/cubb_tournament.css" />
+</head>
+<body class="game-body">
+    <!-- Background Effects -->
+    <div class="bg-animation">
+        <div class="floating-particles"></div>
+        <div class="cosmic-bg"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="game-nav">
+        <a href="index.html" class="nav-home">
+            <i class="fas fa-home"></i> Back to Home
+        </a>
+        <div class="nav-title">
+            <i class="fas fa-crown"></i>
+            CUBB TOURNAMENT
+        </div>
+        <div class="nav-stats">
+            <span id="teamCount">Team: 0</span>
+        </div>
+    </nav>
+
+        <!-- Game Header -->
+        <div class="game-header">
+            <h1 class="game-title">
+                <span class="title-main">CUBB TOURNAMENT</span>
+                <span class="title-sub">Epic Card Draw Battle</span>
+            </h1>
+        </div>
+
+        <!-- Rarity Legend -->
+        <div class="rarity-showcase">
+            <div class="rarity-item ssr-showcase">
+                <div class="rarity-icon">⭐</div>
+                <div class="rarity-info">
+                    <span class="rarity-name">SSR</span>
+                    <span class="rarity-desc">Legendary Players</span>
+                </div>
+            </div>
+            <div class="rarity-item sr-showcase">
+                <div class="rarity-icon">💎</div>
+                <div class="rarity-info">
+                    <span class="rarity-name">SR</span>
+                    <span class="rarity-desc">Elite Players</span>
+                </div>
+            </div>
+            <div class="rarity-item r-showcase">
+                <div class="rarity-icon">🔥</div>
+                <div class="rarity-info">
+                    <span class="rarity-name">R</span>
+                    <span class="rarity-desc">Skilled Players</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Instructions -->
+        <div class="game-instructions">
+            <div class="instruction-card">
+                <i class="fas fa-dice"></i>
+                <span>Draw 4 random cards</span>
+            </div>
+            <div class="instruction-arrow">→</div>
+            <div class="instruction-card">
+                <i class="fas fa-hand-pointer"></i>
+                <span>Choose 1 player</span>
+            </div>
+            <div class="instruction-arrow">→</div>
+            <div class="instruction-card">
+                <i class="fas fa-users"></i>
+                <span>Build your team</span>
+            </div>
+        </div>
+
+        <!-- Card Draw Section -->
+        <div class="draw-arena">
+            <div class="draw-controls">
+                <button class="epic-button draw-btn" onclick="drawCards()" id="drawButton">
+                    <i class="fas fa-magic"></i>
+                    <span>SUMMON CARDS</span>
+                    <div class="button-glow"></div>
+                </button>
+                <button class="epic-button reset-btn" onclick="resetDraw()" id="resetButton">
+                    <i class="fas fa-redo"></i>
+                    <span>RESET</span>
+                </button>
+            </div>
+            
+            <div class="cards-battlefield" id="cardsContainer">
+                <!-- Cards will appear here -->
+            </div>
+        </div>
+
+        <!-- Team Display -->
+        <div class="team-showcase">
+            <h2 class="team-title">
+                <i class="fas fa-shield-alt"></i>
+                YOUR TEAM
+            </h2>
+            <div class="team-grid" id="selectedTeam">
+                <div class="empty-team-message">
+                    <i class="fas fa-plus-circle"></i>
+                    <p>Draw cards to build your legendary team!</p>
+                </div>
+            </div>
+        </div>
+
+    <!-- Particle Effect Container -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Sound Effects (Optional) -->
+    <audio id="cardFlipSound" preload="auto" style="display: none;">
+        <source src="assets/sounds/card-flip.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="cardDrawSound" preload="auto" style="display: none;">
+        <source src="assets/sounds/card-draw.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="assets/js/cubb_tournament.js"></script>
+</body>
+</html>
