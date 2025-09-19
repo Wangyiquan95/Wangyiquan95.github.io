@@ -138,6 +138,9 @@
     background: rgba(0, 255, 136, 0.1);
     border-radius: 20px;
     border: 1px solid rgba(0, 255, 136, 0.3);
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 }
 
 /* Main Game Container */
@@ -314,11 +317,41 @@
 }
 
 .draw-controls {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     display: flex;
     justify-content: center;
     gap: 2rem;
     flex-wrap: wrap;
+}
+
+.team-order-controls {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.order-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.order-btn:hover {
+    background: rgba(0, 255, 255, 0.2);
+    border-color: #00ffff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
 }
 
 .epic-button {
@@ -621,6 +654,16 @@
     font-weight: 700;
 }
 
+.team-order-badge {
+    background: rgba(0, 255, 255, 0.2);
+    color: #00ffff;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: auto;
+}
+
 .team-slot-area {
     display: flex;
     gap: 0.5rem;
@@ -659,6 +702,9 @@
     border: 3px solid;
     position: relative;
     overflow: hidden;
+}
+
+.selected-card.new-card {
     animation: teamCardAppear 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 

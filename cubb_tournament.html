@@ -36,6 +36,7 @@
         </div>
         <div class="nav-stats">
             <span id="teamCount">Team: 0</span>
+            <span id="roundCount">Round: 1</span>
         </div>
     </nav>
 
@@ -101,6 +102,21 @@
                 <button class="epic-button reset-btn" onclick="resetDraw()" id="resetButton">
                     <i class="fas fa-redo"></i>
                     <span>RESET</span>
+                </button>
+            </div>
+            
+            <div class="team-order-controls">
+                <button class="order-btn" onclick="setDefaultOrder()" title="Default Order (Ctrl+1)">
+                    <i class="fas fa-list-ol"></i> Default
+                </button>
+                <button class="order-btn" onclick="setReverseOrder()" title="Reverse Order (Ctrl+2)">
+                    <i class="fas fa-exchange-alt"></i> Reverse
+                </button>
+                <button class="order-btn" onclick="setRandomOrder()" title="Random Order (Ctrl+3)">
+                    <i class="fas fa-random"></i> Random
+                </button>
+                <button class="order-btn" onclick="setCustomOrder()" title="Custom Order (Ctrl+4)">
+                    <i class="fas fa-edit"></i> Custom
                 </button>
             </div>
             

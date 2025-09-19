@@ -56,6 +56,8 @@ const teams = [
 remainingPool = remainingPool.filter(p => !teams.some(t => t.captain === p.name));
 
 let activeTeamIndex = 0; // whose turn to draw
+let teamOrder = [0, 1, 2, 3]; // current team order
+let roundNumber = 1; // current round (1-3 for SSR guarantee)
 
 // Particle System Class
 class ParticleSystem {
@@ -166,7 +168,56 @@ function createCard(player, index) {
 function getRandomPlayers() {
     // Draw unique players from the remaining pool (no duplicates)
     if (remainingPool.length === 0) return [];
-    const poolCopy = [...remainingPool];
+    
+    let availablePool = [...remainingPool];
+    const currentTeam = teams[teamOrder[activeTeamIndex]];
+    
+    // SSR Guarantee Logic: First 3 rounds, ensure each team gets at least one SSR
+    if (roundNumber <= 3) {
+        const teamsWithoutSSR = teams.filter(team => !team.hasSSR);
+        const remainingSSRPlayers = remainingPool.filter(player => player.rarity === 'SSR');
+        
+        // If current team doesn't have SSR and there are SSR players left, prioritize SSR
+        if (!currentTeam.hasSSR && remainingSSRPlayers.length > 0) {
+            // Force at least one SSR in the draw for teams without SSR
+            const ssrPlayer = remainingSSRPlayers[Math.floor(Math.random() * remainingSSRPlayers.length)];
+            const otherPlayers = remainingPool.filter(p => p.name !== ssrPlayer.name);
+            
+            // Shuffle other players and take 3 more
+            const shuffledOthers = [...otherPlayers].sort(() => Math.random() - 0.5);
+            const otherThree = shuffledOthers.slice(0, 3);
+            
+            // Show notification about SSR guarantee
+            setTimeout(() => {
+                showNotification(`SSR Guarantee: ${currentTeam.name} gets priority for legendary players!`, 'ssr');
+            }, 500);
+            
+            return [ssrPlayer, ...otherThree];
+        }
+        // If team already has SSR, filter out SSR players (enforce one SSR per team rule)
+        else if (currentTeam.hasSSR) {
+            availablePool = remainingPool.filter(player => player.rarity !== 'SSR');
+        }
+        // If no SSR players left but team doesn't have SSR, use normal pool
+        else if (!currentTeam.hasSSR && remainingSSRPlayers.length === 0) {
+            // No SSR players left, use normal pool
+            availablePool = [...remainingPool];
+        }
+    }
+    // After round 3, normal logic applies
+    else {
+        // Filter out SSR players if current team already has one
+        if (currentTeam.hasSSR) {
+            availablePool = remainingPool.filter(player => player.rarity !== 'SSR');
+        }
+    }
+    
+    // If no players available after filtering, use original pool
+    if (availablePool.length === 0) {
+        availablePool = [...remainingPool];
+    }
+    
+    const poolCopy = [...availablePool];
     // Shuffle pool copy
     for (let i = poolCopy.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -226,7 +277,7 @@ function drawCards() {
     // Update button state
     const drawButton = document.getElementById('drawButton');
     drawButton.disabled = true;
-    drawButton.innerHTML = `<i class="fas fa-hand-pointer"></i><span>${teams[activeTeamIndex].name} PICK</span>`;
+    drawButton.innerHTML = `<i class="fas fa-hand-pointer"></i><span>${teams[teamOrder[activeTeamIndex]].name} PICK</span>`;
     isDrawn = true;
     hasRevealed = false;
 }
@@ -294,13 +345,16 @@ function updateSelectedTeam() {
     if (!teamsContainer) return;
 
     let html = '';
-    teams.forEach((team, tIdx) => {
-        const activeClass = tIdx === activeTeamIndex ? 'active' : '';
+    teamOrder.forEach((teamIndex, displayOrder) => {
+        const team = teams[teamIndex];
+        const isActive = teamIndex === teamOrder[activeTeamIndex];
+        const activeClass = isActive ? 'active' : '';
         html += `
-            <div class="team-panel ${activeClass}" data-team="${tIdx}" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, ${tIdx})">
+            <div class="team-panel ${activeClass}" data-team="${teamIndex}" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, ${teamIndex})">
                 <div class="team-header">
                     <span class="captain-badge">Captain</span>
                     <span class="team-name">${team.name}</span>
+                    <span class="team-order-badge">#${displayOrder + 1}</span>
                 </div>
                 <div class="team-slot-area">
                     ${team.members.map(m => `
@@ -319,10 +373,62 @@ function updateSelectedTeam() {
     teamsContainer.innerHTML = html;
 }
 
+// Update team display with animation only for new card
+function updateSelectedTeamWithAnimation(teamIndex, newPlayer) {
+    const teamsContainer = document.getElementById('teamsContainer');
+    if (!teamsContainer) return;
+
+    let html = '';
+    teamOrder.forEach((teamIdx, displayOrder) => {
+        const team = teams[teamIdx];
+        const isActive = teamIdx === teamOrder[activeTeamIndex];
+        const activeClass = isActive ? 'active' : '';
+        html += `
+            <div class="team-panel ${activeClass}" data-team="${teamIdx}" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event, ${teamIdx})">
+                <div class="team-header">
+                    <span class="captain-badge">Captain</span>
+                    <span class="team-name">${team.name}</span>
+                    <span class="team-order-badge">#${displayOrder + 1}</span>
+                </div>
+                <div class="team-slot-area">
+                    ${team.members.map(m => {
+                        const isNewCard = (teamIdx === teamIndex && m.name === newPlayer.name);
+                        const newCardClass = isNewCard ? 'new-card' : '';
+                        return `
+                            <div class="selected-card ${m.rarity.toLowerCase()} ${newCardClass}">
+                                <img src="${m.image}" class="card-image" onerror="this.src='images/favicon/android-chrome-192x192.png'">
+                                <div class="card-name">${m.name}</div>
+                                <div class="card-rarity ${m.rarity.toLowerCase()}">${m.rarity}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                    <div class="drop-target">Drop here</div>
+                </div>
+            </div>
+        `;
+    });
+
+    teamsContainer.innerHTML = html;
+    
+    // Remove animation class after animation completes
+    setTimeout(() => {
+        const newCards = teamsContainer.querySelectorAll('.selected-card.new-card');
+        newCards.forEach(card => {
+            card.classList.remove('new-card');
+        });
+    }, 800);
+}
+
 // Update team counter in navigation
 function updateTeamCounter() {
     const counter = document.getElementById('teamCount');
     counter.textContent = `Team: ${selectedPlayers.length}`;
+}
+
+// Update round counter in navigation
+function updateRoundCounter() {
+    const counter = document.getElementById('roundCount');
+    counter.textContent = `Round: ${roundNumber}`;
 }
 
 // Enhanced reset function
@@ -413,14 +519,24 @@ function resetAll() {
     resetDraw();
     selectedPlayers = [];
     remainingPool = [...originalPool];
+    roundNumber = 1;
+    activeTeamIndex = 0;
+    
+    // Reset all teams
+    teams.forEach(team => {
+        team.members = [];
+        team.hasSSR = false;
+    });
+    
     updateSelectedTeam();
     updateTeamCounter();
+    updateRoundCounter();
     
     if (particleSystem) {
         particleSystem.addBurst(window.innerWidth / 2, window.innerHeight / 2, 50, '#4ecdc4');
     }
     
-    showNotification('Team reset! Ready for new adventure!', 'sr');
+    showNotification('Tournament reset! Ready for new adventure!', 'sr');
 }
 
 // Initialize the game
@@ -435,6 +551,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize UI
     updateSelectedTeam();
     updateTeamCounter();
+    updateRoundCounter();
+    
+    // Add team order shortcuts
+    addTeamOrderShortcuts();
     
     // Add keyboard shortcuts
     document.addEventListener('keydown', function(e) {
@@ -502,11 +622,20 @@ function onDrop(evt, teamIndex) {
     if (player.rarity === 'SSR') team.hasSSR = true;
     selectedPlayers.push(player);
     removePlayerFromPool(player);
-    updateSelectedTeam();
+    
+    // Update team display with animation for new card only
+    updateSelectedTeamWithAnimation(teamIndex, player);
     updateTeamCounter();
 
     // Advance to next team turn
     activeTeamIndex = (activeTeamIndex + 1) % teams.length;
+    
+    // Check if we've completed a full round (all teams have drawn)
+    if (activeTeamIndex === 0) {
+        roundNumber++;
+        showNotification(`Round ${roundNumber} started!`, 'sr');
+    }
+    
     updateSelectedTeam();
 
     // Clear current draw and UI
@@ -517,4 +646,52 @@ function onCardClick(cardIndex) {
     if (!isDrawn || hasRevealed) return;
     hasRevealed = true;
     selectCard(cardIndex);
+}
+
+// Quick Team Order Change Functions
+function setTeamOrder(order) {
+    if (order.length !== 4) return;
+    teamOrder = [...order];
+    updateSelectedTeam();
+    showNotification(`Team order changed!`, 'sr');
+}
+
+// Preset team orders
+function setDefaultOrder() {
+    setTeamOrder([0, 1, 2, 3]); // Sangrui, HOOK, Yiquan, Huiyu
+}
+
+function setReverseOrder() {
+    setTeamOrder([3, 2, 1, 0]); // Huiyu, Yiquan, HOOK, Sangrui
+}
+
+function setRandomOrder() {
+    const shuffled = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
+    setTeamOrder(shuffled);
+}
+
+function setCustomOrder() {
+    const input = prompt('Enter team order (0,1,2,3):\n0=Sangrui, 1=HOOK, 2=Yiquan, 3=Huiyu\nExample: 2,0,3,1', teamOrder.join(','));
+    if (input) {
+        const order = input.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x) && x >= 0 && x <= 3);
+        if (order.length === 4) {
+            setTeamOrder(order);
+        } else {
+            showNotification('Invalid order! Use format: 0,1,2,3', 'r');
+        }
+    }
+}
+
+// Keyboard shortcuts for team order
+function addTeamOrderShortcuts() {
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey || e.metaKey) {
+            switch(e.key) {
+                case '1': e.preventDefault(); setDefaultOrder(); break;
+                case '2': e.preventDefault(); setReverseOrder(); break;
+                case '3': e.preventDefault(); setRandomOrder(); break;
+                case '4': e.preventDefault(); setCustomOrder(); break;
+            }
+        }
+    });
 }
