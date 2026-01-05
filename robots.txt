@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yiquan2.com/sitemap.xml
+
